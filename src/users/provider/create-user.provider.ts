@@ -1,60 +1,62 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
-  RequestTimeoutException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users.entity';
+import { HashingProvider } from 'src/auth/providers/hashing.provider';
 
 @Injectable()
 export class CreateUserProvider {
   constructor(
     /**
-     * Inject usersRepository
+     * Inject userRepository
      */
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
+    /**
+     * Inject hashingProvider
+     */
+    @Inject(forwardRef(() => HashingProvider))
+    private readonly hashingProvider: HashingProvider,
   ) {}
 
-  public async createUser(createUserDto: CreateUserDto) {
-    let existingUser;
-
+  /**
+   * Creates a new user
+   * @param createUserDto - Data Transfer Object containing user details
+   * @returns Promise<User>
+   * @throws BadRequestException if the user already exists
+   * @throws InternalServerErrorException if a database error occurs
+   */
+  public async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
-      existingUser = await this.userRepository.findOne({
+      const existingUser = await this.userRepository.findOne({
         where: { email: createUserDto.email },
       });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment please try again later',
-        {
-          description: 'Error connecting to the database',
-        },
-      );
-    }
 
-    if (existingUser) {
-      throw new BadRequestException(
-        'The user already exists. Please check your email.',
-      );
-    }
+      if (existingUser) {
+        throw new BadRequestException(
+          `A user with the email "${createUserDto.email}" already exists.`,
+        );
+      }
 
-    const newUser = this.userRepository.create(createUserDto);
-
-    try {
-      await this.userRepository.save(newUser);
-
-      return newUser;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment please try again later',
-        {
-          description: 'Error connecting to the database',
-        },
-      );
+      const newUser = this.userRepository.create({
+        ...createUserDto,
+        password: await this.hashingProvider.hashPassword(
+          createUserDto.password,
+        ),
+      });
+      return await this.userRepository.save(newUser);
+    } catch (error: unknown) {
+      throw new InternalServerErrorException({
+        message: (error as Error).message.split(':')[0],
+        description: `Failed to create user.`,
+      });
     }
   }
 }

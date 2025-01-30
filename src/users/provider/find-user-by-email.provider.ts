@@ -1,7 +1,7 @@
 import {
   Injectable,
-  RequestTimeoutException,
-  UnauthorizedException,
+  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,29 +10,31 @@ import { User } from '../users.entity';
 @Injectable()
 export class FindUserByEmailProvider {
   constructor(
-    /**
-     * Inject usersRepository
-     */
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
-  public async findUserByEmail(email: string) {
-    let user: User | null;
 
+  /**
+   * Find a user by email
+   * @param email - The email address of the user
+   * @returns Promise<User>
+   * @throws NotFoundException if the user does not exist
+   * @throws InternalServerErrorException if there is a database error
+   */
+  public async findUserByEmail(email: string): Promise<User> {
     try {
-      user = await this.usersRepository.findOneBy({
-        email: email,
-      });
-    } catch (error) {
-      throw new RequestTimeoutException(error, {
-        description: 'Could not fetch the user.',
+      const user = await this.usersRepository.findOneBy({ email });
+
+      if (!user) {
+        throw new NotFoundException(`User with email "${email}" not found.`);
+      }
+
+      return user;
+    } catch (error: unknown) {
+      throw new InternalServerErrorException({
+        message: (error as Error).message.split(':')[0],
+        description: `Failed to find user with email: ${email}.`,
       });
     }
-
-    if (!user) {
-      throw new UnauthorizedException('User not found.');
-    }
-
-    return user;
   }
 }
