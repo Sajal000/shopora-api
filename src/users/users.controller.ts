@@ -51,7 +51,7 @@ export class UsersController {
    * @param page - Page number for paginated results
    * @returns Promise<User[]>
    */
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Retrieve all users from the database' })
   @ApiQuery({
     name: 'limit',
@@ -84,7 +84,7 @@ export class UsersController {
    * @param id - The ID of the user
    * @returns Promise<User>
    */
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Retrieve a specific user by ID' })
   @ApiResponse({ status: 200, description: 'Successfully fetched user!' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -102,7 +102,7 @@ export class UsersController {
    * @param patchUserDto - The updated user details
    * @returns Promise<User>
    */
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update existing user details' })
   @ApiResponse({
     status: 200,
@@ -122,7 +122,7 @@ export class UsersController {
    * @param id - The ID of the user to delete
    * @returns Promise<DeleteResult>
    */
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete an existing user' })
   @ApiResponse({ status: 200, description: 'Successfully deleted user!' })
   @ApiResponse({ status: 404, description: 'User not found' })

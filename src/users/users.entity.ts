@@ -33,6 +33,7 @@ export class User {
     length: 96,
     nullable: false,
   })
+  @Exclude()
   password: string;
 
   @Column({

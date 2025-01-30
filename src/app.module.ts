@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'; // ✅ Import Swagger
 
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
@@ -29,6 +28,7 @@ const ENV = process.env.NODE_ENV;
       load: [appConfig, databaseConfig],
       validationSchema: environmentSchema,
     }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -45,8 +45,10 @@ const ENV = process.env.NODE_ENV;
         database: configService.get<string>('database.name'),
       }),
     }),
+
     UsersModule,
     AuthModule,
+
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
@@ -64,24 +66,4 @@ const ENV = process.env.NODE_ENV;
     AccessTokenGuard,
   ],
 })
-export class AppModule {
-  /**
-   * Configures Swagger with JWT authentication
-   * @param app - The NestJS application instance
-   */
-  static configureSwagger(app) {
-    const config = new DocumentBuilder()
-      .setTitle('My API')
-      .setDescription('API documentation with JWT authentication')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
-
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true, // Keeps token after page refresh
-      },
-    });
-  }
-}
+export class AppModule {}

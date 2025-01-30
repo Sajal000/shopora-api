@@ -35,7 +35,7 @@ export class AuthController {
     return await this.authService.signIn(signInDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('refresh-token')
   @ApiOperation({
     summary: 'Generates refresh token',
   })
