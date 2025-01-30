@@ -3,17 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environmentSchema from './config/environment.validation';
 import jwtConfig from './auth/config/jwt.config';
-
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response.interceptor';
@@ -48,7 +45,6 @@ const ENV = process.env.NODE_ENV;
 
     UsersModule,
     AuthModule,
-
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],

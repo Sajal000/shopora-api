@@ -51,10 +51,14 @@ export function appCreate(app: INestApplication) {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
-  configureSwagger(app); // ✅ Apply Swagger configuration
+  configureSwagger(app);
+  app.enableCors();
 
   Logger.log('Application setup complete', 'Bootstrap');
 }

@@ -82,7 +82,7 @@ export class UserService {
    * @param googleId
    * @returns Promise<User>
    */
-  public async findUserByGoogleId(googleId: string): Promise<User> {
+  public async findUserByGoogleId(googleId: string) {
     return this.findUserByGoogleIdProvider.findUserByGoogle(googleId);
   }
 
