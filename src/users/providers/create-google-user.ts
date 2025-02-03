@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users.entity';
+import { User } from '../entities/users.entity';
 import { Repository } from 'typeorm';
 import { GoogleUser } from '../interfaces/google-user.interface';
 

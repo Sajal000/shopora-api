@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PatchUserDto } from '../dto/patch-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users.entity';
+import { User } from '../entities/users.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

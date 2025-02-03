@@ -1,16 +1,20 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { UserService } from './provider/user.service';
+import { UserService } from './providers/user.service';
 import { UsersController } from './users.controller';
-import { CreateUserProvider } from './provider/create-user.provider';
-import { FindUserByEmailProvider } from './provider/find-user-by-email.provider';
-import { FindUserByGoogleProvider } from './provider/find-user-by-google.provider';
-import { CreateGoogleUserProvider } from './provider/create-google-user';
+import { CreateUserProvider } from './providers/create-user.provider';
+import { FindUserByEmailProvider } from './providers/find-user-by-email.provider';
+import { FindUserByGoogleProvider } from './providers/find-user-by-google.provider';
+import { CreateGoogleUserProvider } from './providers/create-google-user';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users.entity';
-import { PatchUserProvider } from './provider/patch-user.provide';
+import { User } from './entities/users.entity';
+import { PatchUserProvider } from './providers/patch-user.provider';
 import { AuthModule } from 'src/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import profileConfig from './config/profile.config';
+import { Otp } from 'src/auth/otp.entity';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AddressSchema, Address } from './schemas/user-address.schema';
+import { CreateUserAddress } from './providers/create-user-address.provider';
 
 @Module({
   controllers: [UsersController],
@@ -21,13 +25,15 @@ import profileConfig from './config/profile.config';
     FindUserByGoogleProvider,
     CreateGoogleUserProvider,
     PatchUserProvider,
+    CreateUserAddress,
   ],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Otp]),
     forwardRef(() => UsersModule),
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(profileConfig),
+    MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
   ],
 })
 export class UsersModule {}

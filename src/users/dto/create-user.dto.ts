@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -55,6 +56,7 @@ export class CreateUserDto {
     description: 'Phone number of the user',
   })
   @IsString()
+  @IsOptional()
   @MinLength(5)
   @MaxLength(15)
   @Matches(/^\+?[1-9]\d{1,14}$/, {

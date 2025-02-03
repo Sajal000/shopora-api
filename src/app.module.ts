@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import appConfig from './config/app.config';
@@ -14,6 +15,9 @@ import { AuthModule } from './auth/auth.module';
 import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response.interceptor';
+import { MailService } from './mail/providers/mail.service';
+import { MailModule } from './mail/mail.module';
+import { PostModule } from './posts/post.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -26,6 +30,7 @@ const ENV = process.env.NODE_ENV;
       validationSchema: environmentSchema,
     }),
 
+    // PostgreSQL Configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -43,10 +48,21 @@ const ENV = process.env.NODE_ENV;
       }),
     }),
 
+    // MongoDB Configuration
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+    }),
+
     UsersModule,
     AuthModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    MailModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [
@@ -60,6 +76,7 @@ const ENV = process.env.NODE_ENV;
       useClass: DataResponseInterceptor,
     },
     AccessTokenGuard,
+    MailService,
   ],
 })
 export class AppModule {}

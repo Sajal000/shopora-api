@@ -19,12 +19,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserService } from './provider/user.service';
+import { UserService } from './providers/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './users.entity';
+import { User } from './entities/users.entity';
 import { PatchUserDto } from './dto/patch-user.dto';
 import { AuthType } from 'src/auth/enum/auth-type.enum';
 import { Auth } from 'src/auth/decorator/auth.decorator';
+import { Address } from './schemas/user-address.schema';
 
 @Controller('users')
 @ApiTags('Users')
@@ -120,7 +121,7 @@ export class UsersController {
   /**
    * Delete an existing user by ID
    * @param id - The ID of the user to delete
-   * @returns Promise<DeleteResult>
+   *
    */
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete an existing user' })
@@ -129,5 +130,26 @@ export class UsersController {
   @Delete('/:id')
   public async delete(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.delete(id);
+  }
+
+  /**
+   *
+   * @param userId
+   * @param addressData
+   * @returns
+   */
+
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Attach address to existing user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully attached address to user!',
+  })
+  @Post('/address')
+  public async addAddress(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() addressData: Partial<Address>,
+  ) {
+    return this.usersService.addAddress(userId, addressData);
   }
 }

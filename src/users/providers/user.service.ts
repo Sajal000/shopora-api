@@ -9,11 +9,13 @@ import { FindUserByGoogleProvider } from './find-user-by-google.provider';
 import { CreateGoogleUserProvider } from './create-google-user';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users.entity';
+import { User } from '../entities/users.entity';
 import { Repository } from 'typeorm';
 import { PatchUserDto } from '../dto/patch-user.dto';
-import { PatchUserProvider } from './patch-user.provide';
+import { PatchUserProvider } from './patch-user.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
+import { CreateUserAddressProvider } from './create-user-address.provider';
+import { Address } from '../schemas/user-address.schema';
 
 @Injectable()
 export class UserService {
@@ -38,6 +40,13 @@ export class UserService {
      * Injecting patchUserProvider
      */
     private readonly patchUserProvider: PatchUserProvider,
+    /**
+     * Inject createUserAddressProvider
+     */
+    private readonly createAddressProvider: CreateUserAddressProvider,
+    /**
+     * Inject userRepository
+     */
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
@@ -145,5 +154,14 @@ export class UserService {
         description: `Failed to delete user with ID: ${id}.`,
       });
     }
+  }
+
+  /**
+   * Attaches address to user
+   * @param userId
+   * @param addressData
+   */
+  public async addAddress(userId: number, addressData: Partial<Address>) {
+    await this.createAddressProvider.createAddress(userId, addressData);
   }
 }

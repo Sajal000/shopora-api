@@ -7,8 +7,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
  */
 export function configureSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setDescription('API documentation with JWT authentication')
+    .setTitle('Shopora API')
+    .setDescription('API documentation for Shopora')
     .setVersion('1.0')
     .addBearerAuth(
       {

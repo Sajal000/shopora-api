@@ -8,7 +8,7 @@ import { ConfigType } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { GenerateTokensProvider } from 'src/auth/providers/generate-tokens.provider';
-import { UserService } from 'src/users/provider/user.service';
+import { UserService } from 'src/users/providers/user.service';
 import { GoogleTokenDto } from '../dto/google-token.dto';
 
 export class GoogleAuthenticationService implements OnModuleInit {
