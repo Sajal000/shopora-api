@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { MailService } from 'src/mail/providers/mail.service';
-import { Otp } from '../otp.entity';
+import { Otp } from '../entities/otp.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/users.entity';

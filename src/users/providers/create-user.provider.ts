@@ -55,7 +55,7 @@ export class CreateUserProvider {
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
-        description: `Failed to create user.`,
+        description: `Failed to create user. Please try again.`,
       });
     }
   }

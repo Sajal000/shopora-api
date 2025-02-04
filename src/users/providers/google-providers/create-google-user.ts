@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/users.entity';
+import { User } from 'src/users/entities/users.entity';
 import { Repository } from 'typeorm';
-import { GoogleUser } from '../interfaces/google-user.interface';
+import { GoogleUser } from 'src/users/interfaces/google-user.interface';
 
 @Injectable()
 export class CreateGoogleUserProvider {

@@ -31,7 +31,7 @@ export class PatchUserProvider {
       const user = await this.usersRepository.findOneBy({ id });
 
       if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found.`);
+        throw new NotFoundException(`User does not exist!`);
       }
 
       Object.assign(user, patchUserDto);
@@ -39,7 +39,7 @@ export class PatchUserProvider {
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
-        description: `Failed to update user with ID: ${id}.`,
+        description: `Failed to update user information. Please try again later`,
       });
     }
   }

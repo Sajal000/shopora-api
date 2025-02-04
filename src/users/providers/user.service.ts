@@ -2,11 +2,12 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserProvider } from './create-user.provider';
 import { FindUserByEmailProvider } from './find-user-by-email.provider';
-import { FindUserByGoogleProvider } from './find-user-by-google.provider';
-import { CreateGoogleUserProvider } from './create-google-user';
+import { FindUserByGoogleProvider } from './google-providers/find-user-by-google.provider';
+import { CreateGoogleUserProvider } from './google-providers/create-google-user';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/users.entity';
@@ -14,8 +15,14 @@ import { Repository } from 'typeorm';
 import { PatchUserDto } from '../dto/patch-user.dto';
 import { PatchUserProvider } from './patch-user.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
-import { CreateUserAddressProvider } from './create-user-address.provider';
+import { CreateUserAddressProvider } from './address-providers/create-user-address.provider';
 import { CreateUserAddressDto } from '../dto/user-address/create-user-address.dto';
+import { PatchUserAddressProvider } from './address-providers/patch-user-address.provider';
+import { PatchUserAddressDto } from '../dto/user-address/patch-user-address.dto';
+import { GetUsersParamDto } from '../dto/get-user.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Address, UserAddressDocument } from '../schemas/user-address.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UserService {
@@ -45,10 +52,19 @@ export class UserService {
      */
     private readonly createAddressProvider: CreateUserAddressProvider,
     /**
+     * Inject patchUserAddressProvider
+     */
+    private readonly patchUserAddressProvider: PatchUserAddressProvider,
+    /**
      * Inject userRepository
      */
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    /**
+     * Inject mongoDB
+     */
+    @InjectModel(Address.name)
+    private addressModel: Model<UserAddressDocument>,
   ) {}
 
   /**
@@ -100,14 +116,14 @@ export class UserService {
    * @param id
    * @returns Promise<User>
    */
-  public async findById(id: number): Promise<User> {
+  public async findById(id: GetUsersParamDto): Promise<User> {
     try {
-      const user = await this.usersRepository.findOneBy({ id });
+      const user = await this.usersRepository.findOneBy({ id: id.id });
 
       if (!user) {
         throw new BadRequestException({
           message: 'User not found',
-          description: `No user exists in the database with ID: ${id}.`,
+          description: `No user exists in the database with ID: ${user}.`,
         });
       }
 
@@ -115,7 +131,7 @@ export class UserService {
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
-        description: `Failed to retrieve user with ID: ${id}.`,
+        description: `Failed to retrieve user.`,
       });
     }
   }
@@ -142,16 +158,16 @@ export class UserService {
       if (!user) {
         throw new BadRequestException({
           message: 'User not found',
-          description: `No user exists in the database with ID: ${id}.`,
+          description: `User does not exists`,
         });
       }
       await this.usersRepository.delete(id);
 
-      return { message: `User with id ${id} deleted`, deleted: true };
+      return { message: `User deleted!`, deleted: true };
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
-        description: `Failed to delete user with ID: ${id}.`,
+        description: `Failed to delete user`,
       });
     }
   }
@@ -169,5 +185,47 @@ export class UserService {
       userId,
       createUserAddressDto,
     );
+  }
+
+  /**
+   * Update address of existing user
+   * @param userId
+   * @param patchUserAddressDto
+   */
+
+  public async patchAddress(
+    userId: GetUsersParamDto,
+    patchUserAddressDto: PatchUserAddressDto,
+  ) {
+    await this.patchUserAddressProvider.patchUserAddress(
+      patchUserAddressDto,
+      userId,
+    );
+  }
+
+  /**
+   * fetch address of user
+   * @param userId
+   * @returns
+   */
+  public async fetchAddress(userId: GetUsersParamDto): Promise<Address> {
+    try {
+      const user = await this.usersRepository.findOneBy({ id: userId.id });
+
+      if (!user) {
+        throw new NotFoundException(`User does not exist!`);
+      }
+
+      const address = await this.addressModel.findOne({ id: userId.id });
+      if (!address) {
+        throw new NotFoundException(`No address is attached to user!`);
+      }
+      return address;
+    } catch (error: unknown) {
+      throw new InternalServerErrorException({
+        message: (error as Error).message.split(':')[0],
+        description: `Failed to find user's address`,
+      });
+    }
   }
 }

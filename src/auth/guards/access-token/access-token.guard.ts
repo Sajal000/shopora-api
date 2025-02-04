@@ -25,11 +25,16 @@ export class AccessTokenGuard implements CanActivate {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log('AccessTokenGuard triggered');
+
     const request: Request = context.switchToHttp().getRequest<Request>();
     const token = this.extractRequestFromHeader(request);
 
+    console.log('Extracted Token:', token);
+
     if (!token) {
-      throw new UnauthorizedException();
+      console.log('No token found');
+      throw new UnauthorizedException('No token found in the request.');
     }
 
     try {
@@ -38,9 +43,11 @@ export class AccessTokenGuard implements CanActivate {
         token,
         this.jwtConfiguration,
       );
+      console.log('Decoded JWT Payload:', payload);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       request[REQUEST_USER_KEY] = payload;
     } catch (error: unknown) {
+      console.error('JWT Verification Error:', error);
       throw new UnauthorizedException(error, {
         description: 'Failed to authorize user',
       });

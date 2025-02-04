@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Otp } from '../otp.entity';
+import { Otp } from '../entities/otp.entity';
 import { User } from 'src/users/entities/users.entity';
 import { VerifyOTPDto } from '../dto/otp.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -58,8 +58,8 @@ export class VerifyOtpProvider {
       await this.otpRepository.save(otpRecord);
 
       if (!q) {
-        await this.userRepository.save(user);
         user.verified = true;
+        await this.userRepository.save(user);
         return 'User successfully verified!';
       }
 

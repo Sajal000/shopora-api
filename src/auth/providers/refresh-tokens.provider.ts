@@ -51,11 +51,11 @@ export class RefreshTokensProvider {
         issuer: this.jwtConfiguration.issuer,
       });
 
-      const user = await this.userService.findById(sub);
+      const user = await this.userService.findById({ id: sub });
       if (!user) {
         throw new UnauthorizedException({
           message: 'User not found',
-          description: `No user exists in the database with ID: ${sub}.`,
+          description: `No user exists in the database`,
         });
       }
 

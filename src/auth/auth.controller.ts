@@ -133,11 +133,11 @@ export class AuthController {
    * @param updatePasswordDto
    * @returns
    */
+  @Auth()
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: `Updates password for logged users`,
   })
-  @Auth(AuthType.Bearer)
   @Post('update-password')
   public async updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return await this.authService.updatePassword(updatePasswordDto);

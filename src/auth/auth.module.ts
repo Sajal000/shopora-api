@@ -15,10 +15,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { SendOtpProvider } from './providers/send-otp.provider';
 import { VerifyOtpProvider } from './providers/verify-otp.provider';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Otp } from './otp.entity';
+import { Otp } from './entities/otp.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { ForgotPassword } from './providers/forgot-password.provider';
 import { UpdatePassword } from './providers/update-password.provider';
+import { AuthenticationGuard } from './guards/authentication/authentication.guard';
+import { AccessTokenGuard } from './guards/access-token/access-token.guard';
 
 @Module({
   controllers: [AuthController, GoogleAuthenticationController],
@@ -36,6 +38,8 @@ import { UpdatePassword } from './providers/update-password.provider';
     VerifyOtpProvider,
     ForgotPassword,
     UpdatePassword,
+    AccessTokenGuard,
+    AuthenticationGuard,
   ],
   imports: [
     forwardRef(() => UsersModule),
@@ -50,6 +54,8 @@ import { UpdatePassword } from './providers/update-password.provider';
     GoogleAuthenticationService,
     SendOtpProvider,
     VerifyOtpProvider,
+    AuthenticationGuard,
+    AccessTokenGuard,
   ],
 })
 export class AuthModule {}

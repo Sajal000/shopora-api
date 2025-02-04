@@ -34,7 +34,7 @@ export function configureSwagger(app: INestApplication) {
 
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
-      persistAuthorization: true,
+      persistAuthorization: false, // removes token after refresh
     },
   });
 

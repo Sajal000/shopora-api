@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Otp } from 'src/auth/otp.entity';
+import { Otp } from 'src/auth/entities/otp.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
