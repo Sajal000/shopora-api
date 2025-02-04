@@ -32,6 +32,6 @@ export class User {
   @OneToMany(() => Otp, (otp) => otp.user)
   Otp: Otp[];
 
-  @Column({ type: 'string', nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 96, nullable: true, unique: true })
   addressId: string;
 }

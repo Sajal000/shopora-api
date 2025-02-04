@@ -25,7 +25,7 @@ import { User } from './entities/users.entity';
 import { PatchUserDto } from './dto/patch-user.dto';
 import { AuthType } from 'src/auth/enum/auth-type.enum';
 import { Auth } from 'src/auth/decorator/auth.decorator';
-import { Address } from './schemas/user-address.schema';
+import { CreateUserAddressDto } from './dto/user-address/create-user-address.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -138,18 +138,17 @@ export class UsersController {
    * @param addressData
    * @returns
    */
-
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Attach address to existing user' })
   @ApiResponse({
     status: 200,
     description: 'Successfully attached address to user!',
   })
-  @Post('/address')
+  @Post('/:userId/address')
   public async addAddress(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() addressData: Partial<Address>,
+    @Body() createAddressDto: CreateUserAddressDto,
   ) {
-    return this.usersService.addAddress(userId, addressData);
+    return this.usersService.addAddress(userId, createAddressDto);
   }
 }

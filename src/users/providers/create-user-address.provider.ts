@@ -5,10 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, UserAddressDocument } from '../schemas/user-address.schema';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/users.entity';
 import { Repository } from 'typeorm';
+import { CreateUserAddressDto } from '../dto/user-address/create-user-address.dto';
 
 @Injectable()
 export class CreateUserAddressProvider {
@@ -25,15 +26,23 @@ export class CreateUserAddressProvider {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  public async createAddress(userId: number, addressData: Partial<Address>) {
+  public async createAddress(
+    userId: number,
+    createUserAddressDto: CreateUserAddressDto,
+  ) {
     try {
       const user = await this.userRepository.findOneBy({ id: userId });
       if (!user) {
         throw new BadRequestException('User not found');
       }
 
+      const existingAddress = await this.addressModel.findOne({ userId });
+      if (existingAddress) {
+        throw new BadRequestException('Address already exists for this user.');
+      }
+
       const address = await this.addressModel.create({
-        ...addressData,
+        ...createUserAddressDto,
         userId,
       });
 
@@ -41,7 +50,7 @@ export class CreateUserAddressProvider {
         throw new InternalServerErrorException('Address ID missing');
       }
 
-      const addressId: string = (address._id as Types.ObjectId).toString();
+      const addressId: string = address._id as unknown as string;
 
       user.addressId = addressId;
       await this.userRepository.save(user);
@@ -51,12 +60,12 @@ export class CreateUserAddressProvider {
       if (error instanceof Error) {
         throw new InternalServerErrorException({
           message: error.message.split(':')[0],
-          description: `Failed to create user.`,
+          description: `Failed to attach address to user`,
         });
       } else {
         throw new InternalServerErrorException({
           message: 'Unknown error',
-          description: `Failed to create user.`,
+          description: `Failed to attach address to user`,
         });
       }
     }

@@ -14,7 +14,7 @@ import profileConfig from './config/profile.config';
 import { Otp } from 'src/auth/otp.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AddressSchema, Address } from './schemas/user-address.schema';
-import { CreateUserAddress } from './providers/create-user-address.provider';
+import { CreateUserAddressProvider } from './providers/create-user-address.provider';
 
 @Module({
   controllers: [UsersController],
@@ -25,7 +25,7 @@ import { CreateUserAddress } from './providers/create-user-address.provider';
     FindUserByGoogleProvider,
     CreateGoogleUserProvider,
     PatchUserProvider,
-    CreateUserAddress,
+    CreateUserAddressProvider,
   ],
   exports: [UserService, TypeOrmModule],
   imports: [

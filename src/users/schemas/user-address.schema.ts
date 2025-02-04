@@ -8,6 +8,9 @@ export class Address {
   @Prop({ required: true, maxlength: 96 })
   streetAddress: string;
 
+  @Prop({ required: false, maxlength: 96 })
+  streetAddressTwo: string;
+
   @Prop({ required: true, maxlength: 96 })
   city: string;
 
@@ -17,7 +20,7 @@ export class Address {
   @Prop({ required: true, minlength: 3, maxlength: 10, match: /^[0-9]+$/ })
   postalCode: string;
 
-  @Prop({ required: true, maxlength: 96 })
+  @Prop({ required: true, maxlength: 56 })
   country: string;
 
   @Prop({ type: Number, required: true, unique: true })

@@ -15,7 +15,7 @@ import { PatchUserDto } from '../dto/patch-user.dto';
 import { PatchUserProvider } from './patch-user.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { CreateUserAddressProvider } from './create-user-address.provider';
-import { Address } from '../schemas/user-address.schema';
+import { CreateUserAddressDto } from '../dto/user-address/create-user-address.dto';
 
 @Injectable()
 export class UserService {
@@ -52,26 +52,26 @@ export class UserService {
   ) {}
 
   /**
-   * Create a new user
+   *
    * @param createUserDto
-   * @returns Promise<User>
+   * @returns
    */
   public async create(createUserDto: CreateUserDto): Promise<User> {
     return this.createUserProvider.createUser(createUserDto);
   }
 
   /**
-   * Create a new Google user
+   *
    * @param googleUser
-   * @returns Promise<User>
+   * @returns
    */
   public async createGoogleUser(googleUser: GoogleUser): Promise<User> {
     return this.createGoogleUserProvider.createGoogleUser(googleUser);
   }
 
   /**
-   * Retrieve all users
-   * @returns Promise<User[]>
+   *
+   * @returns all users
    */
   public async findAll(): Promise<User[]> {
     return this.usersRepository.find();
@@ -161,7 +161,13 @@ export class UserService {
    * @param userId
    * @param addressData
    */
-  public async addAddress(userId: number, addressData: Partial<Address>) {
-    await this.createAddressProvider.createAddress(userId, addressData);
+  public async addAddress(
+    userId: number,
+    createUserAddressDto: CreateUserAddressDto,
+  ) {
+    await this.createAddressProvider.createAddress(
+      userId,
+      createUserAddressDto,
+    );
   }
 }
