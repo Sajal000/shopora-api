@@ -2,9 +2,9 @@ import { Exclude } from 'class-transformer';
 import { Otp } from 'src/auth/entities/otp.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'user' })
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column({ type: 'varchar', length: 96, nullable: false })
@@ -30,8 +30,8 @@ export class User {
   verified: boolean;
 
   @OneToMany(() => Otp, (otp) => otp.user)
-  Otp: Otp[];
+  otps: Otp[];
 
-  @Column({ type: 'varchar', length: 96, nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 96, nullable: true })
   addressId: string;
 }

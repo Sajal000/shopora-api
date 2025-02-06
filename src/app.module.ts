@@ -18,6 +18,9 @@ import { DataResponseInterceptor } from './common/interceptors/data-response.int
 import { MailService } from './mail/providers/mail.service';
 import { MailModule } from './mail/mail.module';
 import { PostModule } from './posts/post.module';
+import { PostController } from './posts/posts.controller';
+import { TagsModule } from './tags/tags.module';
+import { ImagesModule } from './images/images.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -63,8 +66,10 @@ const ENV = process.env.NODE_ENV;
     JwtModule.registerAsync(jwtConfig.asProvider()),
     MailModule,
     PostModule,
+    TagsModule,
+    ImagesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, PostController],
   providers: [
     AppService,
     {
