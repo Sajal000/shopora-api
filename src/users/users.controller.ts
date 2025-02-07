@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -27,7 +28,6 @@ import { AuthType } from 'src/auth/enum/auth-type.enum';
 import { Auth } from 'src/auth/decorator/auth.decorator';
 import { CreateUserAddressDto } from './dto/user-address/create-user-address.dto';
 import { PatchUserAddressDto } from './dto/user-address/patch-user-address.dto';
-import { GetUsersParamDto } from './dto/get-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -54,7 +54,7 @@ export class UsersController {
    * @param page - Page number for paginated results
    * @returns Promise<User[]>
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Retrieve all users from the database' })
   @ApiQuery({
@@ -88,7 +88,7 @@ export class UsersController {
    * @param id - The ID of the user
    * @returns Promise<User>
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Retrieve a specific user by ID' })
   @ApiResponse({ status: 200, description: 'Successfully fetched user!' })
@@ -96,7 +96,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/:id')
   public async getUserById(
-    @Param('id', ParseIntPipe) id: GetUsersParamDto,
+    @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<User> {
     return this.usersService.findById(id);
   }
@@ -107,7 +107,7 @@ export class UsersController {
    * @param patchUserDto - The updated user details
    * @returns Promise<User>
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update existing user details' })
   @ApiResponse({
@@ -117,7 +117,7 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @Patch('/:id')
   public async patch(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() patchUserDto: PatchUserDto,
   ): Promise<User> {
     return this.usersService.patch(id, patchUserDto);
@@ -128,7 +128,7 @@ export class UsersController {
    * @param id - The ID of the user to delete
    *
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete an existing user' })
   @ApiResponse({ status: 200, description: 'Successfully deleted user!' })
@@ -144,16 +144,16 @@ export class UsersController {
    * @param addressData
    * @returns
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Attach address to existing user' })
   @ApiResponse({
     status: 200,
     description: 'Successfully attached address to user!',
   })
-  @Post('/:userId/address')
+  @Post('/address/:userId')
   public async addAddress(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
     @Body() createAddressDto: CreateUserAddressDto,
   ) {
     return this.usersService.addAddress(userId, createAddressDto);
@@ -165,16 +165,16 @@ export class UsersController {
    * @param patchUserAddressDto
    * @returns
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: `Update existing user's address` })
   @ApiResponse({
     status: 200,
     description: `Successfully updated user's address!`,
   })
-  @Patch('/:userId/address')
+  @Patch('/address/:userId')
   public async patchAddress(
-    @Param('userId', ParseIntPipe) userId: GetUsersParamDto,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
     @Body() patchUserAddressDto: PatchUserAddressDto,
   ) {
     return this.usersService.patchAddress(userId, patchUserAddressDto);
@@ -185,7 +185,7 @@ export class UsersController {
    * @param userId
    * @returns
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Fetch address of existing user' })
   @ApiResponse({
@@ -196,9 +196,9 @@ export class UsersController {
     status: 404,
     description: `Address not found`,
   })
-  @Get('/:userId/address')
+  @Get('/address/:userId')
   public async getAddress(
-    @Param('userId', ParseIntPipe) userId: GetUsersParamDto,
+    @Query('userId', new ParseUUIDPipe()) userId: string,
   ) {
     return this.usersService.fetchAddress(userId);
   }

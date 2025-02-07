@@ -1,4 +1,3 @@
-// src/auth/guards/verified-user.guard.ts
 import {
   CanActivate,
   ExecutionContext,
@@ -28,7 +27,7 @@ export class VerifiedUserGuard implements CanActivate {
       return true;
     }
 
-    if (authTypes?.includes(AuthType.Bearer)) {
+    if (authTypes?.includes(AuthType.VerifiedBearer)) {
       const request = context.switchToHttp().getRequest<AuthRequest>();
       const user = request.user;
 
@@ -36,9 +35,10 @@ export class VerifiedUserGuard implements CanActivate {
         throw new UnauthorizedException('User not authenticated!');
       }
 
-      const dbUser = await this.userService.findById({ id: user.id });
+      const userId = user.id;
+
+      const dbUser = await this.userService.findById(userId);
       if (!dbUser.verified) {
-        console.log('User not verified:', dbUser);
         throw new UnauthorizedException(
           'Account is not verified. Please verify your account.',
         );

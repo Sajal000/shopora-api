@@ -49,7 +49,9 @@ export class ForgotPassword {
         await this.hashingProvider.hashPassword(newPassword);
       user.password = hashedPassword;
 
-      await this.userService.patch(user.id, { password: hashedPassword });
+      await this.userService.patch(String(user.id), {
+        password: hashedPassword,
+      });
 
       return { message: 'Password changed successfully!' };
     } catch (error: unknown) {

@@ -24,9 +24,6 @@ export class Otp {
   @Column({ default: false })
   used: boolean;
 
-  @ManyToOne(() => User, (user) => user.otps)
+  @ManyToOne(() => User, (user) => user.otps, { nullable: false })
   user: User;
-
-  @Column()
-  userId: number;
 }

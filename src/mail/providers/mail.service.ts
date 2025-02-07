@@ -34,9 +34,24 @@ export class MailService {
         'templates',
         `${templateName}.ejs`,
       );
-      const template: string = await fs.readFile(templatePath, 'utf-8');
 
-      const html: string = ejs.render(template, data);
+      let template: string;
+      try {
+        template = await fs.readFile(templatePath, 'utf-8');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        throw new InternalServerErrorException('Failed to load email template');
+      }
+
+      let html: string;
+      try {
+        html = ejs.render(template, data);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        throw new InternalServerErrorException(
+          'Failed to render email template',
+        );
+      }
 
       const mailOptions: nodemailer.SendMailOptions = {
         from: this.configService.get<string>('EMAIL_USER'),
@@ -52,7 +67,6 @@ export class MailService {
         errorMessage = error.message.split(':')[0];
       }
 
-      console.error('Error sending email: ', errorMessage);
       throw new InternalServerErrorException({
         message: 'Failed to send email',
         description: `Error: ${errorMessage}`,

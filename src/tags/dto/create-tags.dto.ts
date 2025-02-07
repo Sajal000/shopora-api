@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsInt,
-  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,7 +10,7 @@ import {
 } from 'class-validator';
 
 export class CreateTagsDto {
-  @ApiProperty({ description: 'Tag names' })
+  @ApiProperty({ description: 'Tag' })
   @IsString()
   @MinLength(1)
   @MaxLength(30)
@@ -30,14 +29,4 @@ export class CreateTagsDto {
   @Min(0)
   @IsOptional()
   usageCount?: number;
-
-  @ApiPropertyOptional({ description: 'Time tag was created' })
-  @IsISO8601()
-  @IsOptional()
-  createdAt?: Date;
-
-  @ApiPropertyOptional({ description: 'Time tag was deleted' })
-  @IsISO8601()
-  @IsOptional()
-  deletedAt?: Date;
 }

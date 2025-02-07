@@ -1,9 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsArray,
   IsEnum,
-  IsISO8601,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -12,7 +9,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { status } from '../enums/post-status.enum';
+import { ProductCondition } from '../enums/product-condition.enum';
 
 export class CreatePostDto {
   @ApiProperty({ description: 'Title of the post' })
@@ -29,40 +26,23 @@ export class CreatePostDto {
   @IsNotEmpty()
   productDescription: string;
 
+  @ApiPropertyOptional({ description: 'Size of the product' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(12)
+  @IsOptional()
+  productSize: string;
+
+  @ApiPropertyOptional({ description: 'Size of the product' })
+  @IsEnum(ProductCondition)
+  @MinLength(1)
+  @MaxLength(200)
+  @IsOptional()
+  productCondition: ProductCondition;
+
   @ApiProperty({ description: 'Price of the product' })
   @IsNumber()
   @Min(0)
   @IsNotEmpty()
   productPrice: number;
-
-  @ApiProperty({
-    description: 'The status of the post',
-    enum: status,
-  })
-  @IsEnum(status)
-  @IsNotEmpty()
-  status: status;
-
-  @ApiPropertyOptional({
-    description: 'The date the post was published',
-  })
-  @IsOptional()
-  @IsISO8601()
-  publishedOn?: Date;
-
-  @ApiPropertyOptional({
-    description: 'Array of tag IDs (MongoDB ObjectIds)',
-  })
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  tags?: string[];
-
-  @ApiPropertyOptional({
-    description: 'Array of featured image URLs',
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  featuredImages?: string[];
 }

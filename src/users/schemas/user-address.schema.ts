@@ -23,8 +23,8 @@ export class Address {
   @Prop({ required: true, maxlength: 56 })
   country: string;
 
-  @Prop({ type: Number, required: true, unique: true })
-  userId: number;
+  @Prop({ type: String, required: true, unique: true })
+  userId: string;
 }
 
 export const AddressSchema = SchemaFactory.createForClass(Address);

@@ -5,7 +5,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 @Entity({ name: 'user' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({ type: 'varchar', length: 96, nullable: false })
   firstName: string;
@@ -33,5 +33,5 @@ export class User {
   otps: Otp[];
 
   @Column({ type: 'varchar', length: 96, nullable: true })
-  addressId: string;
+  addressId: string | null;
 }

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Types, Document } from 'mongoose';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Product } from 'src/posts/schemas/posts.schemas';
 
 export type TagsDocument = Tag & Document;
@@ -15,17 +16,11 @@ export class Tag {
   @Prop({ type: Number, default: 0, required: false })
   usageCount?: number;
 
-  @Prop({ type: Date, required: false })
-  createdAt?: Date;
-
-  @Prop({ type: Date, required: false })
-  deletedAt?: Date;
-
   @Prop({
-    type: [{ type: Types.ObjectId, ref: 'Product', required: true }],
+    type: [{ type: Types.ObjectId, ref: 'Product' }],
     default: [],
   })
-  post: Product;
+  posts: Types.ObjectId[];
 }
 
 export const TagsSchema = SchemaFactory.createForClass(Tag);

@@ -51,7 +51,7 @@ export class RefreshTokensProvider {
         issuer: this.jwtConfiguration.issuer,
       });
 
-      const user = await this.userService.findById({ id: sub });
+      const user = await this.userService.findById(sub.toString());
       if (!user) {
         throw new UnauthorizedException({
           message: 'User not found',

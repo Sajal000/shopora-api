@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/users/providers/user.service';
@@ -22,12 +22,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.userService.findById({ id: payload.sub });
+    const user = await this.userService.findById(payload.sub.toString());
     if (!user) {
-      console.log('User not found:', payload.sub);
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
-    console.log('Authenticated User:', user);
     return user;
   }
 }

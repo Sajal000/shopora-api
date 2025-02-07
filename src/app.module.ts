@@ -21,6 +21,7 @@ import { PostModule } from './posts/post.module';
 import { PostController } from './posts/posts.controller';
 import { TagsModule } from './tags/tags.module';
 import { ImagesModule } from './images/images.module';
+import { VerifiedUserGuard } from './auth/guards/account-verification/verified-user.guard';
 
 const ENV = process.env.NODE_ENV;
 
@@ -75,6 +76,10 @@ const ENV = process.env.NODE_ENV;
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: VerifiedUserGuard,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -16,6 +16,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AddressSchema, Address } from './schemas/user-address.schema';
 import { CreateUserAddressProvider } from './providers/address-providers/create-user-address.provider';
 import { PatchUserAddressProvider } from './providers/address-providers/patch-user-address.provider';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   controllers: [UsersController],
@@ -36,6 +37,7 @@ import { PatchUserAddressProvider } from './providers/address-providers/patch-us
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(profileConfig),
     MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
+    forwardRef(() => MailModule),
   ],
 })
 export class UsersModule {}

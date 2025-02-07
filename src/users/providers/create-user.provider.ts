@@ -6,36 +6,33 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { User } from '../entities/users.entity';
+import { Otp } from 'src/auth/entities/otp.entity';
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
+import { MailService } from 'src/mail/providers/mail.service';
 
 @Injectable()
 export class CreateUserProvider {
   constructor(
-    /**
-     * Inject userRepository
-     */
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @Inject(forwardRef(() => HashingProvider))
     /**
      * Inject hashingProvider
      */
-    @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
+    /**
+     * Inject mailServices
+     */
+    private readonly mailServices: MailService,
+    /**
+     * Inject dataSource
+     */
+    private readonly dataSource: DataSource,
   ) {}
 
-  /**
-   * Creates a new user
-   * @param createUserDto - Data Transfer Object containing user details
-   * @returns Promise<User>
-   * @throws BadRequestException if the user already exists
-   * @throws InternalServerErrorException if a database error occurs
-   */
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
-    try {
-      const existingUser = await this.userRepository.findOne({
+    return this.dataSource.transaction(async (manager) => {
+      const existingUser = await manager.findOne(User, {
         where: { email: createUserDto.email },
       });
 
@@ -45,18 +42,47 @@ export class CreateUserProvider {
         );
       }
 
-      const newUser = this.userRepository.create({
+      const newUser = manager.create(User, {
         ...createUserDto,
         password: await this.hashingProvider.hashPassword(
           createUserDto.password,
         ),
       });
-      return await this.userRepository.save(newUser);
-    } catch (error: unknown) {
-      throw new InternalServerErrorException({
-        message: (error as Error).message.split(':')[0],
-        description: `Failed to create user. Please try again.`,
-      });
-    }
+
+      await manager.save(newUser);
+
+      try {
+        const generateOtp = Math.floor(100000 + Math.random() * 900000);
+
+        const otpRecord = manager.create(Otp, {
+          user: newUser,
+          code: generateOtp,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
+        });
+
+        await manager.save(otpRecord);
+
+        await this.mailServices.sendMailWithTemplate(
+          newUser.email,
+          'Welcome to Shopora!',
+          'welcome',
+          { name: newUser.firstName, email: newUser.email },
+        );
+
+        await this.mailServices.sendMailWithTemplate(
+          newUser.email,
+          'Your account verification code',
+          'otp-verification',
+          { name: newUser.firstName, otp: generateOtp },
+        );
+
+        return newUser;
+      } catch (emailError) {
+        console.error('Failed to send email:', emailError);
+        throw new InternalServerErrorException(
+          'Failed to send verification email, user creation aborted.',
+        );
+      }
+    });
   }
 }

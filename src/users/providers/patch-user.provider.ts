@@ -24,7 +24,7 @@ export class PatchUserProvider {
    * @throws InternalServerErrorException if an update error occurs
    */
   public async patchUser(
-    id: number,
+    id: string,
     patchUserDto: PatchUserDto,
   ): Promise<User> {
     try {

@@ -19,7 +19,6 @@ import { CreateUserAddressProvider } from './address-providers/create-user-addre
 import { CreateUserAddressDto } from '../dto/user-address/create-user-address.dto';
 import { PatchUserAddressProvider } from './address-providers/patch-user-address.provider';
 import { PatchUserAddressDto } from '../dto/user-address/patch-user-address.dto';
-import { GetUsersParamDto } from '../dto/get-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Address, UserAddressDocument } from '../schemas/user-address.schema';
 import { Model } from 'mongoose';
@@ -116,14 +115,14 @@ export class UserService {
    * @param id
    * @returns Promise<User>
    */
-  public async findById(id: GetUsersParamDto): Promise<User> {
+  public async findById(id: string): Promise<User> {
     try {
-      const user = await this.usersRepository.findOneBy({ id: id.id });
+      const user = await this.usersRepository.findOneBy({ id });
 
       if (!user) {
         throw new BadRequestException({
           message: 'User not found',
-          description: `No user exists in the database with ID: ${user}.`,
+          description: `No user exists in the database with ID: ${id}.`,
         });
       }
 
@@ -142,7 +141,7 @@ export class UserService {
    * @param patchUserDto
    * @returns Promise<User>
    */
-  public async patch(id: number, patchUserDto: PatchUserDto): Promise<User> {
+  public async patch(id: string, patchUserDto: PatchUserDto): Promise<User> {
     return this.patchUserProvider.patchUser(id, patchUserDto);
   }
 
@@ -153,7 +152,7 @@ export class UserService {
    */
   public async delete(id: number) {
     try {
-      const user = await this.usersRepository.findOneBy({ id });
+      const user = await this.usersRepository.findOneBy({ id: id.toString() });
 
       if (!user) {
         throw new BadRequestException({
@@ -178,10 +177,10 @@ export class UserService {
    * @param addressData
    */
   public async addAddress(
-    userId: number,
+    userId: string,
     createUserAddressDto: CreateUserAddressDto,
-  ) {
-    await this.createAddressProvider.createAddress(
+  ): Promise<string> {
+    return this.createAddressProvider.createAddress(
       userId,
       createUserAddressDto,
     );
@@ -194,7 +193,7 @@ export class UserService {
    */
 
   public async patchAddress(
-    userId: GetUsersParamDto,
+    userId: string,
     patchUserAddressDto: PatchUserAddressDto,
   ) {
     await this.patchUserAddressProvider.patchUserAddress(
@@ -208,15 +207,16 @@ export class UserService {
    * @param userId
    * @returns
    */
-  public async fetchAddress(userId: GetUsersParamDto): Promise<Address> {
+  public async fetchAddress(userId: string): Promise<Address> {
     try {
-      const user = await this.usersRepository.findOneBy({ id: userId.id });
+      const user = await this.usersRepository.findOneBy({ id: userId });
 
       if (!user) {
         throw new NotFoundException(`User does not exist!`);
       }
 
-      const address = await this.addressModel.findOne({ id: userId.id });
+      const address = await this.addressModel.findOne({ userId }).lean();
+
       if (!address) {
         throw new NotFoundException(`No address is attached to user!`);
       }
@@ -225,6 +225,34 @@ export class UserService {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
         description: `Failed to find user's address`,
+      });
+    }
+  }
+
+  public async deleteAddress(userId: string) {
+    try {
+      const user = await this.usersRepository.findOneBy({ id: userId });
+
+      if (!user) {
+        throw new NotFoundException('User does not exist');
+      }
+
+      const address = await this.addressModel.findOne({ userId }).lean();
+
+      if (!address) {
+        throw new NotFoundException('No address is attached to user!');
+      }
+
+      await this.addressModel.deleteOne({ userId });
+
+      user.addressId = null;
+      await this.usersRepository.save(user);
+
+      return { message: `Address deleted!`, deleted: true };
+    } catch (error: unknown) {
+      throw new InternalServerErrorException({
+        message: (error as Error).message.split(':')[0],
+        description: `Failed to delete user's address. `,
       });
     }
   }

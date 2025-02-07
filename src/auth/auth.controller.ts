@@ -133,7 +133,7 @@ export class AuthController {
    * @param updatePasswordDto
    * @returns
    */
-  @Auth()
+  @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: `Updates password for logged users`,

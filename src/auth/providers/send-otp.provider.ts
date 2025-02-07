@@ -42,7 +42,7 @@ export class SendOtpProvider {
       }
 
       const checkOtp = await this.otpRepository.findOne({
-        where: { userId: user.id, used: false },
+        where: { user: user, used: false },
         order: { createdAt: 'DESC' },
       });
 
@@ -51,20 +51,24 @@ export class SendOtpProvider {
         await this.otpRepository.save(checkOtp);
       }
 
+      // Generate a 6-digit OTP
       const generateOtp = Math.floor(100000 + Math.random() * 900000);
-      console.log(generateOtp);
+      console.log('Generated OTP:', generateOtp);
 
       const newOtp = this.otpRepository.create({
-        userId: user.id,
+        user: user,
         code: generateOtp,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 mins
       });
-      console.log(newOtp);
 
+      console.log('New OTP record:', newOtp);
+
+      // Save OTP in database
       await this.otpRepository.save(newOtp);
 
       const userFName = user.firstName;
 
+      // Send OTP email
       await this.mailServices.sendMailWithTemplate(
         user.email,
         q === 'forgot-password'

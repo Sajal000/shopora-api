@@ -21,6 +21,7 @@ import { ForgotPassword } from './providers/forgot-password.provider';
 import { UpdatePassword } from './providers/update-password.provider';
 import { AuthenticationGuard } from './guards/authentication/authentication.guard';
 import { AccessTokenGuard } from './guards/access-token/access-token.guard';
+import { VerifiedUserGuard } from './guards/account-verification/verified-user.guard';
 
 @Module({
   controllers: [AuthController, GoogleAuthenticationController],
@@ -40,6 +41,7 @@ import { AccessTokenGuard } from './guards/access-token/access-token.guard';
     UpdatePassword,
     AccessTokenGuard,
     AuthenticationGuard,
+    VerifiedUserGuard,
   ],
   imports: [
     forwardRef(() => UsersModule),
@@ -56,6 +58,7 @@ import { AccessTokenGuard } from './guards/access-token/access-token.guard';
     VerifyOtpProvider,
     AuthenticationGuard,
     AccessTokenGuard,
+    VerifiedUserGuard,
   ],
 })
 export class AuthModule {}

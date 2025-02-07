@@ -22,7 +22,8 @@ export class CreateUserAddressProvider {
      * Inject mongoDB
      */
     @InjectModel(Address.name)
-    private addressModel: Model<UserAddressDocument>,
+    private readonly addressModel: Model<UserAddressDocument>,
+
     /**
      * Inject userRepository
      */
@@ -31,47 +32,35 @@ export class CreateUserAddressProvider {
   ) {}
 
   public async createAddress(
-    userId: number,
+    userId: string,
     createUserAddressDto: CreateUserAddressDto,
   ): Promise<string> {
-    try {
-      const user = await this.userRepository.findOneBy({ id: userId });
-      if (!user) {
-        throw new NotFoundException(`User does not exist!`);
-      }
+    const user = await this.userRepository.findOneBy({ id: userId });
 
-      const existingAddress = await this.addressModel.findOne({ userId });
-      if (existingAddress) {
-        throw new BadRequestException('Address already exists for this user!');
-      }
-
-      const address = await this.addressModel.create({
-        ...createUserAddressDto,
-        userId,
-      });
-
-      if (!address._id) {
-        throw new InternalServerErrorException('Address ID missing');
-      }
-
-      const addressId: string = address._id as unknown as string;
-
-      user.addressId = addressId;
-      await this.userRepository.save(user);
-
-      return `Address created and attached to user!`;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new InternalServerErrorException({
-          message: error.message.split(':')[0],
-          description: `Failed to attach address to user. Please try again later`,
-        });
-      } else {
-        throw new InternalServerErrorException({
-          message: 'Unknown error',
-          description: `Failed to attach address to user. Please try again later`,
-        });
-      }
+    if (!user) {
+      throw new NotFoundException(`User does not exist!`);
     }
+
+    // Check if user already has an address in MongoDB
+    const existingAddress = await this.addressModel.findOne({ userId }).lean();
+    if (existingAddress) {
+      throw new BadRequestException('Address already exists for this user!');
+    }
+
+    // Create new address entry in MongoDB
+    const address = await this.addressModel.create({
+      ...createUserAddressDto,
+      userId,
+    });
+
+    if (!address._id) {
+      throw new InternalServerErrorException('Failed to generate address ID');
+    }
+
+    // Attach newly created address ID to user entity in PostgreSQL
+    user.addressId = address._id as unknown as string;
+    await this.userRepository.save(user);
+
+    return 'Address created and attached to user!';
   }
 }

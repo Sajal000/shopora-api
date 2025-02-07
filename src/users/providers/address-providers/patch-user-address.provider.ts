@@ -6,7 +6,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Model } from 'mongoose';
-import { GetUsersParamDto } from 'src/users/dto/get-user.dto';
 import { PatchUserAddressDto } from 'src/users/dto/user-address/patch-user-address.dto';
 import { User } from 'src/users/entities/users.entity';
 import {
@@ -32,19 +31,19 @@ export class PatchUserAddressProvider {
 
   public async patchUserAddress(
     patchUserAddressDto: PatchUserAddressDto,
-    userId: GetUsersParamDto,
+    userId: string,
   ): Promise<string> {
     try {
-      const user = await this.userRepository.findOneBy({ id: userId.id });
+      const user = await this.userRepository.findOneBy({ id: userId });
       if (!user) {
         throw new NotFoundException(`User does not exist!`);
       }
-      const address = await this.addressModel.findOne({ id: userId.id });
+      const address = await this.addressModel.findOne({ userId }).lean();
       if (!address) {
         throw new NotFoundException(`No address is attached to user!`);
       }
       Object.assign(address, patchUserAddressDto);
-      await this.addressModel.updateOne({ id: userId.id }, address);
+      await this.addressModel.updateOne({ id: userId }, address);
       return `Address updated for user!`;
     } catch (error: unknown) {
       throw new InternalServerErrorException({

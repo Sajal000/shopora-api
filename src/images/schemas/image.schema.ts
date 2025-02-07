@@ -11,8 +11,8 @@ export class Image {
   @Prop({ default: '' })
   description: string;
 
-  @Prop({ type: Number, required: true })
-  authorId: number;
+  @Prop({ type: String, required: true })
+  authorId: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Product', required: true })
   productId: Types.ObjectId;
