@@ -9,16 +9,13 @@ export const dataSourceOptions: DataSourceOptions = {
   password: process.env.DATABASE_PASSWORD || 'password123',
   database: process.env.DATABASE_NAME || 'my-nest-app',
   entities: [
-    process.env.NODE_ENV === 'development'
-      ? 'src/**/*.entity.ts'
-      : 'dist/**/*.entity.js',
+    __dirname +
+      (process.env.NODE_ENV === 'development'
+        ? '/../**/*.entity.ts'
+        : '/../dist/**/*.entity.js'),
   ],
-  migrations: [
-    process.env.NODE_ENV === 'development'
-      ? 'src/migrations/*.ts'
-      : 'dist/migrations/*.js',
-  ],
-  synchronize: process.env.DATABASE_SYNC === 'true',
+migrations: ['./src/migrations/*.{ts,js}'],
+  synchronize: process.env.DATABASE_SYNC === 'true' ? true : false,
   logging: process.env.NODE_ENV === 'development',
 };
 

@@ -34,6 +34,11 @@ export class UploadPostProvider {
       author: user.id,
     });
 
-    return await post.save();
+    await post.save();
+
+    user.userPosts = [...(user.userPosts || []), post._id as string];
+    await this.userRepository.save(user);
+
+    return post;
   }
 }

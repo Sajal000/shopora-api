@@ -34,4 +34,7 @@ export class User {
 
   @Column({ type: 'varchar', length: 96, nullable: true })
   addressId: string | null;
+
+  @Column({ type: 'text', array: true, default: () => 'ARRAY[]::text[]' })
+  userPosts: string[];
 }

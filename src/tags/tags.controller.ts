@@ -38,8 +38,8 @@ export class TagController {
    * Get multiple tags by their IDs
    * @param tagIds - List of tag IDs
    */
-  @ApiOperation({ summary: 'Upload a tag' })
-  @ApiResponse({ status: 201, description: 'Successfully uploaded a tag' })
+  @ApiOperation({ summary: 'Get tag details via tagId' })
+  @ApiResponse({ status: 200, description: 'Successfully fetched tag details' })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @Get()
