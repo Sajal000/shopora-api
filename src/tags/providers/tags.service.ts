@@ -34,24 +34,25 @@ export class TagsService {
     });
 
     if (existingTag) {
-      return await this.tagModel.findByIdAndUpdate(
-        existingTag._id,
-        { $inc: { usageCount: 1 } },
-        { new: true },
-      );
+      return { message: 'Tag is posted!', tag: existingTag };
     }
 
     const newTag = new this.tagModel({ ...createTagsDto, usageCount: 1 });
     await newTag.save();
 
-    user.userTags = [...(user.userTags || []), newTag._id as string];
-    await this.userRepository.save(user);
+    if (!user.userTags) {
+      user.userTags = [];
+    }
 
-    return newTag;
+    if (!user.userTags.includes(newTag._id as string)) {
+      user.userTags.push(newTag._id as string);
+      await this.userRepository.save(user);
+    }
+
+    return { message: 'Tag is posted!', tag: newTag };
   }
 
   public async findMultipleTags(tagIds: string[]) {
-    const result = await this.tagModel.find({ _id: { $in: tagIds } });
-    return result;
+    return await this.tagModel.find({ _id: { $in: tagIds } });
   }
 }

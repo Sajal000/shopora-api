@@ -77,11 +77,11 @@ export class CreateUserProvider {
         );
 
         return newUser;
-      } catch (emailError) {
-        console.error('Failed to send email:', emailError);
-        throw new InternalServerErrorException(
-          'Failed to send verification email, user creation aborted.',
-        );
+      } catch (error: unknown) {
+        throw new InternalServerErrorException({
+          message: (error as Error).message.split(':')[0],
+          description: `Failed to send verification email, user creation aborted.`,
+        });
       }
     });
   }

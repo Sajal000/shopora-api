@@ -28,7 +28,9 @@ export class SignInProvider {
     private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
-  public async signIn(signIn: SignInDto) {
+  public async signIn(
+    signIn: SignInDto,
+  ): Promise<{ userId: string; accessToken: string; refreshToken: string }> {
     const user = await this.userService.findUserByEmail(signIn.email);
 
     let isEqual: boolean = false;
@@ -49,6 +51,11 @@ export class SignInProvider {
       throw new UnauthorizedException('Incorrect password');
     }
 
-    return await this.generateTokensProvider.generateToken(user);
+    const userId = user.id;
+
+    const { accessToken, refreshToken } =
+      await this.generateTokensProvider.generateToken(user);
+
+    return { userId, accessToken, refreshToken };
   }
 }

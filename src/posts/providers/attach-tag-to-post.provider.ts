@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Tag, TagsDocument } from 'src/tags/schemas/tags.schemas';
 import { Product, ProductDocument } from '../schemas/posts.schemas';
+import { AttachTagsToPostDto } from '../dto/attach-tags-to-post.dto';
 
 @Injectable()
 export class AttachTagToPostProvider {
@@ -18,31 +19,45 @@ export class AttachTagToPostProvider {
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
   ) {}
-  public async addTagsToPost(postId: string, tagNames: string[]) {
-    const existingTags = await this.tagModel.find({ name: { $in: tagNames } });
+  public async addTagsToPost(
+    postId: string,
+    attachTagsToPostDto: AttachTagsToPostDto,
+  ) {
+    const { tagIds } = attachTagsToPostDto;
+    const post = await this.productModel.findOne({ _id: postId });
+    if (!post) {
+      throw new BadRequestException('Post does not exist!');
+    }
 
-    const existingTagNames = new Set(existingTags.map((tag) => tag.name));
+    const tags = await this.tagModel.find({ _id: { $in: tagIds } });
+    if (!tags.length) {
+      throw new BadRequestException('No valid tags found!');
+    }
 
-    const newTagNames = tagNames.filter((name) => !existingTagNames.has(name));
-
-    const newTags = await this.tagModel.insertMany(
-      newTagNames.map((name) => ({ name, usageCount: 1 })),
+    const existingTagIds = new Set(
+      (post.tags ?? []).map((tagId) => tagId.toString()),
     );
+
+    const newTagIds = tags
+      .map((tag) => tag._id as string)
+      .filter((tagId) => !existingTagIds.has(tagId));
+
+    if (newTagIds.length === 0) {
+      return { message: 'Tags already attached to post', post };
+    }
+
+    post.tags = post.tags ?? [];
+    post.tags.push(...newTagIds.map((id) => new mongoose.Types.ObjectId(id)));
+    await post.save();
 
     await this.tagModel.updateMany(
-      { name: { $in: existingTagNames } },
-      { $inc: { usageCount: 1 } },
+      { _id: { $in: newTagIds } },
+      {
+        $addToSet: { posts: postId },
+        $inc: { usageCount: 1 },
+      },
     );
 
-    const allTagIds = [
-      ...existingTags.map((tag) => tag._id),
-      ...newTags.map((tag) => tag._id),
-    ];
-
-    return await this.productModel.findByIdAndUpdate(
-      postId,
-      { $set: { tags: allTagIds } },
-      { new: true },
-    );
+    return { message: 'Tags successfully attached to post', post };
   }
 }

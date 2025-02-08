@@ -24,13 +24,12 @@ export class FetchTagsOfPostProvider {
   ) {}
   public async fetchTagsOfPost(postId: string): Promise<Tag[]> {
     try {
-      const post = await this.productModel.findOne({ id: postId });
+      const post = await this.productModel.findOne({ _id: postId }).lean();
       if (!post) {
         throw new BadRequestException('Post does not exist');
       }
 
-      const tagsDocument = await this.tagModel.findOne({ postId }).lean();
-      const tags: Tag[] = tagsDocument ? [tagsDocument] : [];
+      const tags = await this.tagModel.find({ posts: postId }).lean();
 
       return tags;
     } catch (error: unknown) {

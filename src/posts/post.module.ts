@@ -9,6 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/users.entity';
 import { Tag, TagsSchema } from 'src/tags/schemas/tags.schemas';
 import { FetchTagsOfPostProvider } from './providers/fetch-tags-of-post.provider';
+import { PatchPostProvider } from './providers/patch-post.provider';
+import { FetchUserPostProvider } from './providers/fetch-user-post.provider';
+import { DeleteUserPostProvider } from './providers/delete-user-post.provider';
+import { DetachTagsFromPost } from './providers/detach-tags-from-post';
 
 @Module({
   imports: [
@@ -24,6 +28,10 @@ import { FetchTagsOfPostProvider } from './providers/fetch-tags-of-post.provider
     UploadPostProvider,
     AttachTagToPostProvider,
     FetchTagsOfPostProvider,
+    PatchPostProvider,
+    FetchUserPostProvider,
+    DeleteUserPostProvider,
+    DetachTagsFromPost,
   ],
   exports: [PostService],
 })

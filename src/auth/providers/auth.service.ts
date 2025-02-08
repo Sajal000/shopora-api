@@ -39,7 +39,9 @@ export class AuthService {
      */
     private readonly updatePasswordProvider: UpdatePassword,
   ) {}
-  public async signIn(signInDto: SignInDto) {
+  public async signIn(
+    signInDto: SignInDto,
+  ): Promise<{ userId: string; accessToken: string; refreshToken: string }> {
     return await this.signInProvider.signIn(signInDto);
   }
 
