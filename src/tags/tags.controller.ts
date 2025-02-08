@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -29,9 +37,12 @@ export class TagController {
   @ApiResponse({ status: 201, description: 'Successfully uploaded a tag' })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
-  @Post()
-  public async uploadTags(@Body() createTagDto: CreateTagsDto) {
-    return await this.tagService.post(createTagDto);
+  @Post('/:userId')
+  public async uploadTags(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() createTagDto: CreateTagsDto,
+  ) {
+    return await this.tagService.post(userId, createTagDto);
   }
 
   /**

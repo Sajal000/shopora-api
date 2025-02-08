@@ -1,11 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
 
@@ -23,10 +21,4 @@ export class CreateTagsDto {
   @MinLength(1)
   @MaxLength(500)
   description?: string;
-
-  @ApiPropertyOptional({ description: 'Usage count of tags' })
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  usageCount?: number;
 }

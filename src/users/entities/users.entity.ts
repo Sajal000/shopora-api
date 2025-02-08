@@ -37,4 +37,7 @@ export class User {
 
   @Column({ type: 'text', array: true, default: () => 'ARRAY[]::text[]' })
   userPosts: string[];
+
+  @Column({ type: 'text', array: true, default: () => 'ARRAY[]::text[]' })
+  userTags: string[];
 }
