@@ -57,7 +57,6 @@ export class AuthController {
    * @param refreshToken
    * @returns authToken and refreshToken
    */
-  @ApiBearerAuth('refresh-token')
   @ApiOperation({
     summary: 'Takes in refresh token to generate new auth token',
   })

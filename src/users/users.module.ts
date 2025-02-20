@@ -17,6 +17,7 @@ import { AddressSchema, Address } from './schemas/user-address.schema';
 import { CreateUserAddressProvider } from './providers/address-providers/create-user-address.provider';
 import { PatchUserAddressProvider } from './providers/address-providers/patch-user-address.provider';
 import { MailModule } from 'src/mail/mail.module';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
   controllers: [UsersController],
@@ -38,6 +39,7 @@ import { MailModule } from 'src/mail/mail.module';
     ConfigModule.forFeature(profileConfig),
     MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
     forwardRef(() => MailModule),
+    PaginationModule,
   ],
 })
 export class UsersModule {}

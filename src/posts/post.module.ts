@@ -13,12 +13,16 @@ import { PatchPostProvider } from './providers/patch-post.provider';
 import { FetchUserPostProvider } from './providers/fetch-user-post.provider';
 import { DeleteUserPostProvider } from './providers/delete-user-post.provider';
 import { DetachTagsFromPost } from './providers/detach-tags-from-post';
+import { MongoosePagination } from 'src/common/pagination/providers/mongoose-pagination';
+import { FetchImagesOfPostProvider } from './providers/fetch-images-of-post.provider';
+import { Image, ImageSchema } from 'src/images/schemas/image.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
       { name: Tag.name, schema: TagsSchema },
+      { name: Image.name, schema: ImageSchema },
     ]),
     TypeOrmModule.forFeature([User]),
   ],
@@ -32,6 +36,8 @@ import { DetachTagsFromPost } from './providers/detach-tags-from-post';
     FetchUserPostProvider,
     DeleteUserPostProvider,
     DetachTagsFromPost,
+    MongoosePagination,
+    FetchImagesOfPostProvider,
   ],
   exports: [PostService],
 })

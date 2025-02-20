@@ -7,10 +7,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -21,6 +23,11 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { AttachTagsToPostDto } from './dto/attach-tags-to-post.dto';
 import { DeletePostDto } from './dto/delete-post.dto';
 import { PatchPostDto } from './dto/patch-post.dto';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { Paginated } from 'src/common/pagination/interfaces/pagination.interface';
+import { Product } from './schemas/posts.schemas';
+import { Tag } from 'src/tags/schemas/tags.schemas';
+import { Image } from 'src/images/schemas/image.schema';
 
 @Controller('posts')
 @ApiTags('Posts')
@@ -60,13 +67,32 @@ export class PostController {
     status: 201,
     description: 'Successfully fetched users posts!',
   })
+  @ApiQuery({
+    name: 'limit',
+    type: 'number',
+    required: false,
+    description: 'Number of posts per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully fetched users posts!',
+  })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @Get('/:userId')
   public async fetchPosts(
     @Param('userId', new ParseUUIDPipe()) userId: string,
-  ) {
-    return await this.postService.fetchPosts(userId);
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<Paginated<Product>> {
+    return await this.postService.fetchPosts(userId, paginationQuery);
   }
 
   /**
@@ -118,7 +144,7 @@ export class PostController {
   })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
-  @Patch(':postId/tags')
+  @Post(':postId/tags')
   public async attachTagToPost(
     @Param('postId') postId: string,
     @Body() tagIds: AttachTagsToPostDto,
@@ -139,7 +165,7 @@ export class PostController {
   })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
-  @Delete(':postId/tags')
+  @Patch(':postId/tags')
   public async detachTagsFromPost(
     @Param('postId') postId: string,
     @Body() tagIds: AttachTagsToPostDto,
@@ -157,10 +183,61 @@ export class PostController {
     status: 200,
     description: 'Successfully fetched tags of post',
   })
+  @ApiQuery({
+    name: 'limit',
+    type: 'number',
+    required: false,
+    description: 'Number of tags per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @Get(':postId/tags')
-  public async fetchTagsOfPost(@Param('postId') postId: string) {
-    return await this.postService.fetchTagsOfPost(postId);
+  public async fetchTagsOfPost(
+    @Param('postId') postId: string,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<Paginated<Tag>> {
+    return await this.postService.fetchTagsOfPost(postId, paginationQuery);
+  }
+
+  /**
+   * Fetching images to post
+   * @param postId
+   * @returns
+   */
+  @ApiOperation({ summary: 'Fetching images of post' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully fetched images of post',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: 'number',
+    required: false,
+    description: 'Number of images per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
+  @Auth(AuthType.VerifiedBearer)
+  @ApiBearerAuth('access-token')
+  @Get(':postId/images')
+  public async fetchImagesOfPost(
+    @Param('postId') postId: string,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<Paginated<Image>> {
+    return await this.postService.fetchImagesOfPost(postId, paginationQuery);
   }
 }

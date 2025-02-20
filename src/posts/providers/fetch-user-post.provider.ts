@@ -4,11 +4,14 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Product, ProductDocument } from '../schemas/posts.schemas';
+import { Product } from '../schemas/posts.schemas';
 import { Model } from 'mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/users.entity';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { Paginated } from 'src/common/pagination/interfaces/pagination.interface';
+import { MongoosePagination } from 'src/common/pagination/providers/mongoose-pagination';
 
 @Injectable()
 export class FetchUserPostProvider {
@@ -17,15 +20,22 @@ export class FetchUserPostProvider {
      * Inject MongoDB
      */
     @InjectModel(Product.name)
-    private readonly productModel: Model<ProductDocument>,
+    private readonly productModel: Model<Product>,
     /**
      * Inject PostgreSQL User Repository
      */
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    /**
+     * Inject MongoosePagination provider
+     */
+    private readonly mongoosePagination: MongoosePagination,
   ) {}
 
-  public async fetchPosts(userId: string) {
+  public async fetchPosts(
+    userId: string,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<Paginated<Product>> {
     try {
       const user = await this.userRepository.findOneBy({ id: userId });
 
@@ -33,9 +43,11 @@ export class FetchUserPostProvider {
         throw new BadRequestException('User does not exist!');
       }
 
-      const posts = await this.productModel.find({ author: userId }).lean();
-
-      return posts;
+      return await this.mongoosePagination.paginateQuery<Product>(
+        paginationQuery,
+        this.productModel,
+        { author: userId },
+      );
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],

@@ -2,7 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -16,7 +15,6 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -57,29 +55,10 @@ export class UsersController {
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Retrieve all users from the database' })
-  @ApiQuery({
-    name: 'limit',
-    type: 'number',
-    required: false,
-    description: 'The limit of entries returned per query',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'page',
-    type: 'number',
-    required: false,
-    description: 'The position of the page number to return',
-    example: 1,
-  })
   @ApiResponse({ status: 200, description: 'Successfully fetched users!' })
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  public async getUsers(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-  ): Promise<User[]> {
+  public async getUsers() {
     return this.usersService.findAll();
   }
 

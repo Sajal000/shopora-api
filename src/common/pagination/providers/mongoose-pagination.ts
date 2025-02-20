@@ -7,7 +7,10 @@ import { Paginated } from '../interfaces/pagination.interface';
 
 @Injectable()
 export class MongoosePagination {
-  constructor(@Inject(REQUEST) private readonly request: Request) {}
+  constructor(
+    @Inject(REQUEST)
+    private readonly request: Request,
+  ) {}
 
   public async paginateQuery<T>(
     paginationQuery: PaginationQueryDto,

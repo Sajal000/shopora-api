@@ -1,18 +1,35 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type ImageDocument = Image & Document;
 
 @Schema({ timestamps: true })
 export class Image {
-  @Prop({ required: true })
-  url: string;
+  @Prop({
+    type: {
+      original: { type: String, required: true },
+      thumbnail: { type: String },
+      medium: { type: String },
+    },
+    required: true,
+  })
+  urls: {
+    original: string;
+    thumbnail?: string;
+    medium?: string;
+  }[];
 
-  @Prop({ default: '' })
-  description: string;
+  @Prop({ type: Number, required: true })
+  size: number;
 
   @Prop({ type: String, required: true })
-  authorId: string;
+  mimeType: string;
+
+  @Prop({ default: '', required: false })
+  altText?: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  authorId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Product', required: true })
   productId: Types.ObjectId;
