@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Image, ImageDocument } from '../schemas/image.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { MulterFile } from '../interfaces/multer-file.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/users.entity';
@@ -37,14 +37,28 @@ export class UploadImageProvider {
     productId: string,
   ): Promise<Image[]> {
     try {
+      console.log('Received files:', files);
+      console.log('Received authorId:', authorId);
+      console.log('Received productId:', productId);
+
       const user = await this.userRepository.findOneBy({ id: authorId });
       if (!user) {
         throw new BadRequestException('Failed to connect with user');
       }
 
-      const post = await this.productModel.findOne({ _id: productId });
+      const mongoProductId = new mongoose.Types.ObjectId(productId);
+
+      const post = await this.productModel
+        .findOne({ _id: mongoProductId })
+        .lean();
       if (!post) {
-        throw new BadRequestException('Post does not exist!');
+        throw new BadRequestException('Post does not exist in MongoDB');
+      }
+
+      if (!files || files.length === 0) {
+        throw new BadRequestException(
+          'No files uploaded. Please attach at least one file.',
+        );
       }
 
       const savedImages = await Promise.all(
@@ -65,11 +79,10 @@ export class UploadImageProvider {
       await this.productModel.findByIdAndUpdate(
         productId,
         {
-          $push: { featuredImages: { search: imageIds } },
+          $push: { featuredImages: { $each: imageIds } },
         },
         { new: true },
       );
-
       return savedImages;
     } catch (error: unknown) {
       throw new InternalServerErrorException({

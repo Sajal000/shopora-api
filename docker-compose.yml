@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: shopora_postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5434:5432' # Match .env.docker
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopora_network
+
+  # MongoDB Service
+  mongodb:
+    image: mongo:6-jammy
+    container_name: shopora_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - '27017:27017'
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.runCommand("ping").ok']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopora_network
+
+  # NestJS API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shopora_api
+    environment:
+      # Database configurations
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
+      # MongoDB configurations
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+
+      # Application configurations
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      API_PREFIX: ${API_PREFIX}
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
+
+      # JWT Configurations
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TOKEN_AUDIENCE: ${JWT_TOKEN_AUDIENCE}
+      JWT_TOKEN_ISSUER: ${JWT_TOKEN_ISSUER}
+      JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL}
+      JWT_REFRESH_TOKEN_TTL: ${JWT_REFRESH_TOKEN_TTL}
+
+      # Google OAuth Credentials
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      # Email Configuration
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+
+      # File Upload Configuration
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL}
+
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./uploads:/app/uploads
+      - ./mail-templates:/app/mail-templates
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - shopora_network
+
+# Persistent named volumes
+volumes:
+  postgres_data:
+  mongodb_data:
+
+# Custom network for service isolation
+networks:
+  shopora_network:
+    driver: bridge

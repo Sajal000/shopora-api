@@ -16,7 +16,7 @@ import {
 import { ImagesService } from './providers/images.service';
 import { Auth } from 'src/auth/decorator/auth.decorator';
 import { AuthType } from 'src/auth/enum/auth-type.enum';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from './config/multer.config';
 
 @ApiTags('Images')
@@ -39,13 +39,13 @@ export class ImagesController {
   @Auth(AuthType.VerifiedBearer)
   @ApiBearerAuth('access-token')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('files', multerConfig))
   @ApiOperation({ summary: 'Upload an image' })
   @ApiResponse({ status: 201, description: 'Successfully uploaded an image' })
   @Post('/:authorId/:productId')
+  @UseInterceptors(FilesInterceptor('files', 10, multerConfig))
   public async uploadImage(
     @Param('authorId') authorId: string,
-    @Param('product') productId: string,
+    @Param('productId') productId: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return await this.imageService.uploadImages(files, authorId, productId);
