@@ -22,6 +22,8 @@ import { PostController } from './posts/posts.controller';
 import { TagsModule } from './tags/tags.module';
 import { ImagesModule } from './images/images.module';
 import { VerifiedUserGuard } from './auth/guards/account-verification/verified-user.guard';
+import { ChatController } from './chat/chat.controller';
+import { ChatModule } from './chat/chat.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -69,8 +71,9 @@ const ENV = process.env.NODE_ENV;
     PostModule,
     TagsModule,
     ImagesModule,
+    ChatModule,
   ],
-  controllers: [AppController, PostController],
+  controllers: [AppController, PostController, ChatController],
   providers: [
     AppService,
     {

@@ -25,7 +25,7 @@ export class DeleteImageProvider {
 
   public async deleteImage(imageId: string, productId: string) {
     try {
-      const post = await this.productModel.findOne({ _id: productId });
+      const post = await this.productModel.findOne({ _id: productId }).lean();
       if (!post) {
         throw new BadRequestException('Post does not exist!');
       }

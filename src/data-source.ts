@@ -14,7 +14,7 @@ export const dataSourceOptions: DataSourceOptions = {
         ? '/../**/*.entity.ts'
         : '/../dist/**/*.entity.js'),
   ],
-migrations: ['./src/migrations/*.{ts,js}'],
+  migrations: ['./src/migrations/*.{ts,js}'],
   synchronize: process.env.DATABASE_SYNC === 'true' ? true : false,
   logging: process.env.NODE_ENV === 'development',
 };

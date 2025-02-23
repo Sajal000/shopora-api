@@ -41,7 +41,7 @@ export class FetchImagesOfPostProvider {
       return await this.mongoosePagination.paginateQuery<Image>(
         paginationQuery,
         this.imageModel,
-        { posts: postId },
+        { productId: postId },
       );
     } catch (error: unknown) {
       throw new InternalServerErrorException({

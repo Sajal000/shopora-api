@@ -18,7 +18,8 @@ export class UploadImageProvider {
     /**
      * Inject mongoDb
      */
-    @InjectModel(Image.name) private readonly imageModel: Model<ImageDocument>,
+    @InjectModel(Image.name)
+    private readonly imageModel: Model<ImageDocument>,
     /**
      * Inject userRepository
      */
@@ -37,10 +38,6 @@ export class UploadImageProvider {
     productId: string,
   ): Promise<Image[]> {
     try {
-      console.log('Received files:', files);
-      console.log('Received authorId:', authorId);
-      console.log('Received productId:', productId);
-
       const user = await this.userRepository.findOneBy({ id: authorId });
       if (!user) {
         throw new BadRequestException('Failed to connect with user');
