@@ -24,7 +24,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
     this.users.forEach((value, key) => {
       if (value === client.id) {
         this.users.delete(key);
@@ -38,7 +37,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     this.users.set(userId, client.id);
-    console.log(`User registered: ${userId}`);
   }
 
   @SubscribeMessage('send_message')

@@ -3,11 +3,19 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.DATABASE_HOST || 'localhost',
-  port: parseInt(process.env.DATABASE_PORT || '5433', 10),
-  username: process.env.DATABASE_USER || 'postgres',
-  password: process.env.DATABASE_PASSWORD || 'password123',
-  database: process.env.DATABASE_NAME || 'my-nest-app',
+  host:
+    process.env.DATABASE_HOST ||
+    'dpg-cuuatgfnoe9s73d4gtmg-a.ohio-postgres.render.com',
+  port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+  username: process.env.DATABASE_USER || 'shopora_db_user',
+  password: process.env.DATABASE_PASSWORD || 'zpvMGvzfaQXq6sTwS1zSTfkTetM86oHV',
+  database: process.env.DATABASE_NAME || 'shopora_db',
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
   entities: [
     __dirname +
       (process.env.NODE_ENV === 'development'

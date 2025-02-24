@@ -53,15 +53,12 @@ export class SendOtpProvider {
 
       // Generate a 6-digit OTP
       const generateOtp = Math.floor(100000 + Math.random() * 900000);
-      console.log('Generated OTP:', generateOtp);
 
       const newOtp = this.otpRepository.create({
         user: user,
         code: generateOtp,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 mins
       });
-
-      console.log('New OTP record:', newOtp);
 
       // Save OTP in database
       await this.otpRepository.save(newOtp);
