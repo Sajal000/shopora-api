@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Tag } from 'src/tags/schemas/tags.schemas';
 import { ProductCondition } from '../enums/product-condition.enum';
+import { ProductStatus } from '../enums/product-status.enum';
 
 export type ProductDocument = Product & Document;
 
@@ -16,12 +17,21 @@ export class Product {
 
   @Prop({ required: false, type: String, maxlength: 12 })
   productSize: string;
+
   @Prop({
     type: String,
     enum: Object.values(ProductCondition),
     required: false,
   })
   productCondition: ProductCondition;
+
+  @Prop({
+    type: String,
+    enum: Object.values(ProductStatus),
+    required: true,
+    default: ProductStatus.AVAILABLE,
+  })
+  productStatus: ProductStatus;
 
   @Prop({ required: true, type: Number, min: 0 })
   productPrice: number;
