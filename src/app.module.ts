@@ -24,6 +24,7 @@ import { ImagesModule } from './images/images.module';
 import { VerifiedUserGuard } from './auth/guards/account-verification/verified-user.guard';
 import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
+import { PaymentModule } from './payment/payment.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -78,6 +79,7 @@ const ENV = process.env.NODE_ENV;
     TagsModule,
     ImagesModule,
     ChatModule,
+    PaymentModule,
   ],
   controllers: [AppController, PostController, ChatController],
   providers: [
