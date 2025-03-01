@@ -12,6 +12,12 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
 
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+  });
+
   appCreate(app);
 
   await app.listen(process.env.PORT ?? 3000);
