@@ -12,6 +12,25 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
 
+  app.use((req, res, next) => {
+    const allowedOrigins = ['http://localhost:3000', process.env.FRONTEND_URL];
+
+    if (allowedOrigins.includes(req.headers.origin)) {
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    }
+
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS',
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization',
+    );
+    next();
+  });
+
   appCreate(app);
   await app.listen(process.env.PORT ?? 3000);
 }
