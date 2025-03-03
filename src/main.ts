@@ -5,16 +5,22 @@ import { appCreate } from './app.create';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = ['http://localhost:3000'];
+
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
+    },
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
 
   app.use((req, res, next) => {
-    const allowedOrigins = ['http://localhost:3000', process.env.FRONTEND_URL];
-
     if (allowedOrigins.includes(req.headers.origin)) {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     }
@@ -28,10 +34,16 @@ async function bootstrap() {
       'Access-Control-Allow-Headers',
       'Content-Type, Authorization',
     );
+
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+
     next();
   });
 
   appCreate(app);
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();
