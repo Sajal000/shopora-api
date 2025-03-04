@@ -25,7 +25,7 @@ export function configureSwagger(app: INestApplication) {
 
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
-      persistAuthorization: false, 
+      persistAuthorization: false,
     },
   });
 
@@ -49,7 +49,7 @@ export function appCreate(app: INestApplication) {
   );
 
   configureSwagger(app);
-  app.enableCors();
+  // app.enableCors(); // Removed to prevent overriding the specific CORS configuration in main.ts
 
   Logger.log('Application setup complete', 'Bootstrap');
 }
