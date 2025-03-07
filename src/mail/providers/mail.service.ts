@@ -56,11 +56,12 @@ export class MailService {
 
       const templatePath = join(
         __dirname,
-        '..', // Moves up from 'dist/mail/providers' to 'dist/mail'
+        '..',
+        '..',
+        'mail',
         'templates',
         `${templateName}.ejs`,
       );
-
       console.log(`📂 Resolving email template path: ${templatePath}`);
 
       let template: string;
