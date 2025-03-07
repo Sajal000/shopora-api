@@ -41,9 +41,17 @@ export class GenerateTokensProvider {
         this.jwtConfiguration.accessTokenTtl,
         {
           email: user.email,
+          verified: user.verified,
         },
       ),
-      this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
+      this.signToken<Partial<ActiveUserData>>(
+        user.id.toString(),
+        this.jwtConfiguration.refreshTokenTtl,
+        {
+          email: user.email,
+          verified: user.verified,
+        },
+      ),
     ]);
     return { accessToken, refreshToken };
   }

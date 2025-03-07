@@ -8,13 +8,11 @@ import { Reflector } from '@nestjs/core';
 import { AUTH_TYPE_KEY } from 'src/auth/constants/auth.constants';
 import { AuthType } from 'src/auth/enum/auth-type.enum';
 import { AuthRequest } from 'src/auth/interfaces/auth-request.interfaces';
-import { UserService } from 'src/users/providers/user.service';
 
 @Injectable()
 export class VerifiedUserGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -35,14 +33,16 @@ export class VerifiedUserGuard implements CanActivate {
         throw new UnauthorizedException('User not authenticated!');
       }
 
-      const userId = user.id;
 
-      const dbUser = await this.userService.findById(userId);
-      if (!dbUser.verified) {
+      // Check if verified status is in the JWT token payload
+      if (user.verified !== true) {
         throw new UnauthorizedException(
           'Account is not verified. Please verify your account.',
         );
       }
+
+      // User is verified based on the token, allow access
+      return true;
     }
 
     return true;

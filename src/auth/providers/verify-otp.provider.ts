@@ -9,6 +9,7 @@ import { Otp } from '../entities/otp.entity';
 import { User } from 'src/users/entities/users.entity';
 import { VerifyOTPDto } from '../dto/otp.dto';
 import { JwtService } from '@nestjs/jwt';
+import { GenerateTokensProvider } from './generate-tokens.provider';
 
 @Injectable()
 export class VerifyOtpProvider {
@@ -27,6 +28,10 @@ export class VerifyOtpProvider {
      * Inject jwtProvider
      */
     private readonly jwtService: JwtService,
+    /**
+     * Inject GenerateTokensProvider
+     */
+    private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
   public async verifyOtp(verifyOtpDto: VerifyOTPDto, q: string) {
@@ -60,7 +65,11 @@ export class VerifyOtpProvider {
       if (!q) {
         user.verified = true;
         await this.userRepository.save(user);
-        return 'User successfully verified!';
+        const tokens = await this.generateTokensProvider.generateToken(user);
+        return {
+          message: 'User successfully verified!',
+          ...tokens,
+        };
       }
 
       if (q === 'forgot-password') {

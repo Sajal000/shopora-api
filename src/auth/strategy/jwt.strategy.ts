@@ -8,6 +8,7 @@ import { UserService } from 'src/users/providers/user.service';
 interface JwtPayload {
   sub: number;
   email: string;
+  verified: boolean;
 }
 
 @Injectable()
@@ -22,10 +23,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.userService.findById(payload.sub.toString());
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+    // Create a user object that includes data from the token
+    // This avoids unnecessary database queries for validation
+    return {
+      id: payload.sub.toString(),
+      email: payload.email,
+      verified: payload.verified,
+    };
   }
 }
