@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && copyfiles -u 2 \"src/mail/templates/**\" dist/mail/templates && ls -la dist/mail/templates",
+    "build": "nest build && mkdir -p dist/mail/templates && cp -r src/mail/templates/* dist/mail/templates/",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node --max-old-space-size=2048 dist/src/main.js",
     "start:dev": "nest start --watch",
