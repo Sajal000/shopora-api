@@ -54,18 +54,60 @@ export class MailService {
         `📧 Attempting to send email to: ${to}, using template: ${templateName}`,
       );
 
-      const templatePath = join(
-        __dirname,
-        '..',
-        '..',
-        'mail',
-        'templates',
-        `${templateName}.ejs`,
+      // Define possible template paths in order of preference
+      const possiblePaths = [
+        // Path 1: dist/mail/templates (standard path after build)
+        join(process.cwd(), 'dist', 'mail', 'templates', `${templateName}.ejs`),
+
+        // Path 2: dist/src/mail/templates (alternate path that might exist on Render)
+        join(
+          process.cwd(),
+          'dist',
+          'src',
+          'mail',
+          'templates',
+          `${templateName}.ejs`,
+        ),
+
+        // Path 3: src/mail/templates (for local development without build)
+        join(process.cwd(), 'src', 'mail', 'templates', `${templateName}.ejs`),
+
+        // Path 4: Using __dirname as fallback (previous approach)
+        join(__dirname, '..', '..', 'mail', 'templates', `${templateName}.ejs`),
+      ];
+
+      console.log(
+        `U0001F4C2 Attempting to locate template in multiple possible locations`,
       );
-      console.log(`📂 Resolving email template path: ${templatePath}`);
+      for (const possiblePath of possiblePaths) {
+        console.log(`U0001F4C2 Checking path: ${possiblePath}`);
+      }
 
       let template: string;
+      let templatePath;
       try {
+        // Try each path in sequence until we find one that works
+
+        let fileFound = false;
+
+        for (const path of possiblePaths) {
+          try {
+            await fs.access(path); // Check if file exists
+            templatePath = path;
+            fileFound = true;
+            console.log(`✅ Template found at: ${templatePath}`);
+            break;
+          } catch (err) {
+            console.log(`❌ Template not found at: ${path}, ${err}`);
+          }
+        }
+
+        if (!fileFound) {
+          throw new Error(
+            `Template '${templateName}.ejs' not found in any of the expected locations`,
+          );
+        }
+
         template = await fs.readFile(templatePath, 'utf-8');
       } catch (error) {
         console.error('❌ Failed to load email template:', error);
