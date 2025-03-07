@@ -13,14 +13,33 @@ export class MailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private readonly configService: ConfigService) {
+    const user = this.configService.get<string>('EMAIL_USER');
+    const pass = this.configService.get<string>('EMAIL_PASS');
+
+    console.log('📧 SMTP Config:', {
+      user,
+      pass: pass ? '*******' : '❌ NOT SET',
+    });
+
+    if (!user || !pass) {
+      console.error(
+        '❌ EMAIL_USER or EMAIL_PASS is missing in environment variables',
+      );
+    }
+
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
-      auth: {
-        user: this.configService.get<string>('EMAIL_USER'),
-        pass: this.configService.get<string>('EMAIL_PASS'),
-      },
+      auth: { user, pass },
+    });
+
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('❌ SMTP Connection Error:', error);
+      } else {
+        console.log('✅ SMTP Connection Successful:', success);
+      }
     });
   }
 
@@ -31,6 +50,10 @@ export class MailService {
     data: Record<string, any>,
   ): Promise<void> {
     try {
+      console.log(
+        `📧 Attempting to send email to: ${to}, using template: ${templateName}`,
+      );
+
       const templatePath = join(
         process.env.NODE_ENV === 'production' ? __dirname : 'src/mail',
         'templates',
@@ -40,19 +63,25 @@ export class MailService {
       let template: string;
       try {
         template = await fs.readFile(templatePath, 'utf-8');
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        throw new InternalServerErrorException('Failed to load email template');
+        console.error('❌ Failed to load email template:', error);
+        throw new InternalServerErrorException({
+          message: 'Failed to load email template',
+          description: `Error reading file: ${templatePath}`,
+          stack: error.stack,
+        });
       }
 
       let html: string;
       try {
         html = ejs.render(template, data);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        throw new InternalServerErrorException(
-          'Failed to render email template',
-        );
+        console.error('❌ Failed to render email template:', error);
+        throw new InternalServerErrorException({
+          message: 'Failed to render email template',
+          description: 'Error rendering EJS template.',
+          stack: error.stack,
+        });
       }
 
       const mailOptions: nodemailer.SendMailOptions = {
@@ -62,16 +91,18 @@ export class MailService {
         html,
       };
 
+      console.log(`📤 Sending email to ${to}...`);
+
       await this.transporter.sendMail(mailOptions);
-    } catch (error: unknown) {
-      let errorMessage = 'An unknown error occurred while sending the email.';
-      if (error instanceof Error) {
-        errorMessage = error.message.split(':')[0];
-      }
+      console.log(`✅ Email successfully sent to ${to}`);
+    } catch (error) {
+      console.error('❌ Failed to send email:', error);
 
       throw new InternalServerErrorException({
         message: 'Failed to send email',
-        description: `Error: ${errorMessage}`,
+        description: `SMTP Error: ${error.message}`,
+        stack: error.stack,
+        details: error.response || 'No additional error details available.',
       });
     }
   }
