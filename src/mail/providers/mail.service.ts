@@ -16,30 +16,11 @@ export class MailService {
     const user = this.configService.get<string>('EMAIL_USER');
     const pass = this.configService.get<string>('EMAIL_PASS');
 
-    console.log('📧 SMTP Config:', {
-      user,
-      pass: pass ? '*******' : '❌ NOT SET',
-    });
-
-    if (!user || !pass) {
-      console.error(
-        '❌ EMAIL_USER or EMAIL_PASS is missing in environment variables',
-      );
-    }
-
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
       auth: { user, pass },
-    });
-
-    this.transporter.verify((error, success) => {
-      if (error) {
-        console.error('❌ SMTP Connection Error:', error);
-      } else {
-        console.log('✅ SMTP Connection Successful:', success);
-      }
     });
   }
 
@@ -50,16 +31,9 @@ export class MailService {
     data: Record<string, any>,
   ): Promise<void> {
     try {
-      console.log(
-        `📧 Attempting to send email to: ${to}, using template: ${templateName}`,
-      );
-
-      // Define possible template paths in order of preference
       const possiblePaths = [
-        // Path 1: dist/mail/templates (standard path after build)
         join(process.cwd(), 'dist', 'mail', 'templates', `${templateName}.ejs`),
 
-        // Path 2: dist/src/mail/templates (alternate path that might exist on Render)
         join(
           process.cwd(),
           'dist',
@@ -69,36 +43,27 @@ export class MailService {
           `${templateName}.ejs`,
         ),
 
-        // Path 3: src/mail/templates (for local development without build)
         join(process.cwd(), 'src', 'mail', 'templates', `${templateName}.ejs`),
 
-        // Path 4: Using __dirname as fallback (previous approach)
         join(__dirname, '..', '..', 'mail', 'templates', `${templateName}.ejs`),
       ];
-
-      console.log(
-        `U0001F4C2 Attempting to locate template in multiple possible locations`,
-      );
-      for (const possiblePath of possiblePaths) {
-        console.log(`U0001F4C2 Checking path: ${possiblePath}`);
-      }
 
       let template: string;
       let templatePath;
       try {
-        // Try each path in sequence until we find one that works
-
         let fileFound = false;
 
         for (const path of possiblePaths) {
           try {
-            await fs.access(path); // Check if file exists
+            await fs.access(path);
             templatePath = path;
             fileFound = true;
-            console.log(`✅ Template found at: ${templatePath}`);
             break;
-          } catch (err) {
-            console.log(`❌ Template not found at: ${path}, ${err}`);
+          } catch (error) {
+            throw new InternalServerErrorException({
+              message: (error as Error).message.split(':')[0],
+              description: `Error reading file: ${templatePath}`,
+            });
           }
         }
 
@@ -110,11 +75,9 @@ export class MailService {
 
         template = await fs.readFile(templatePath, 'utf-8');
       } catch (error) {
-        console.error('❌ Failed to load email template:', error);
         throw new InternalServerErrorException({
-          message: 'Failed to load email template',
+          message: (error as Error).message.split(':')[0],
           description: `Error reading file: ${templatePath}`,
-          stack: error.stack,
         });
       }
 
@@ -122,11 +85,9 @@ export class MailService {
       try {
         html = ejs.render(template, data);
       } catch (error) {
-        console.error('❌ Failed to render email template:', error);
         throw new InternalServerErrorException({
-          message: 'Failed to render email template',
+          message: (error as Error).message.split(':')[0],
           description: 'Error rendering EJS template.',
-          stack: error.stack,
         });
       }
 
@@ -137,18 +98,11 @@ export class MailService {
         html,
       };
 
-      console.log(`📤 Sending email to ${to}...`);
-
       await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email successfully sent to ${to}`);
     } catch (error) {
-      console.error('❌ Failed to send email:', error);
-
       throw new InternalServerErrorException({
-        message: 'Failed to send email',
+        message: (error as Error).message.split(':')[0],
         description: `SMTP Error: ${error.message}`,
-        stack: error.stack,
-        details: error.response || 'No additional error details available.',
       });
     }
   }

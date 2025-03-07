@@ -94,19 +94,22 @@ export class PaymentController {
           signature,
           endpointSecret!,
         );
-      } catch (err) {
-        console.error(`Webhook signature verification failed.`, err);
+      } catch (error) {
         return {
           status: 400,
-          message: 'Webhook signature verification failed',
+          message: (error as Error).message.split(':')[0],
+          description: 'Webhook signature verification failed',
         };
       }
 
       await this.stripeService.handleWebHookEvent(event);
       return { received: true };
     } catch (error) {
-      console.error('Webhook processing failed', error);
-      return { status: 500, message: 'Webhook processing failed' };
+      return {
+        status: 500,
+        message: (error as Error).message.split(':')[0],
+        description: 'Webhook processing failed',
+      };
     }
   }
 
