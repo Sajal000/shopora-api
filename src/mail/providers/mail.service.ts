@@ -54,10 +54,14 @@ export class MailService {
         `📧 Attempting to send email to: ${to}, using template: ${templateName}`,
       );
 
-      const templatePath =
-        process.env.NODE_ENV === 'production'
-          ? join(__dirname, '../../mail/templates', `${templateName}.ejs`)
-          : join('src/mail/templates', `${templateName}.ejs`);
+      const templatePath = join(
+        __dirname,
+        '..', // Moves up from 'dist/mail/providers' to 'dist/mail'
+        'templates',
+        `${templateName}.ejs`,
+      );
+
+      console.log(`📂 Resolving email template path: ${templatePath}`);
 
       let template: string;
       try {
