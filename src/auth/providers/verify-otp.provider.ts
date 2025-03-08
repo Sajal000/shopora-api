@@ -62,12 +62,15 @@ export class VerifyOtpProvider {
       otpRecord.used = true;
       await this.otpRepository.save(otpRecord);
 
+      const userId = user.id;
+
       if (!q) {
         user.verified = true;
         await this.userRepository.save(user);
         const tokens = await this.generateTokensProvider.generateToken(user);
         return {
           message: 'User successfully verified!',
+          userId,
           ...tokens,
         };
       }

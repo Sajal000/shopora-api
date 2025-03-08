@@ -39,6 +39,7 @@ export class UploadPostProvider {
     user.userPosts = [...(user.userPosts || []), post._id as string];
     await this.userRepository.save(user);
 
-    return post;
+    const postId = post._id as string;
+    return { postId, post };
   }
 }

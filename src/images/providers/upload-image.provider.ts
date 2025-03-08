@@ -38,6 +38,8 @@ export class UploadImageProvider {
     productId: string,
   ): Promise<Image[]> {
     try {
+      console.log('Received productId for image upload:', productId);
+
       const user = await this.userRepository.findOneBy({ id: authorId });
       if (!user) {
         throw new BadRequestException('Failed to connect with user');
