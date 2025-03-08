@@ -36,7 +36,7 @@ export class UploadImageProvider {
     files: MulterFile[],
     authorId: string,
     productId: string,
-  ): Promise<Image[]> {
+  ) {
     try {
       console.log('Received productId for image upload:', productId);
 
@@ -82,7 +82,7 @@ export class UploadImageProvider {
         },
         { new: true },
       );
-      return savedImages;
+      return { savedImages: savedImages, imageIds: imageIds };
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],

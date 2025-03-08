@@ -45,12 +45,15 @@ export class TagsService {
       throw new BadRequestException('User not found');
     }
 
+    const tagIds: string[] = [];
+
     const existingTag = await this.tagModel.findOne({
       name: createTagsDto.name,
     });
 
     if (existingTag) {
-      return { message: 'Tag is posted!', tag: existingTag };
+      tagIds.push(existingTag._id as string);
+      return { message: 'Tag is posted!', tag: existingTag, tagIds: tagIds };
     }
 
     const newTag = new this.tagModel({ ...createTagsDto, usageCount: 1 });
@@ -65,7 +68,9 @@ export class TagsService {
       await this.userRepository.save(user);
     }
 
-    return { message: 'Tag is posted!', tag: newTag };
+    tagIds.push(newTag._id as string);
+
+    return { message: 'Tag is posted!', tag: newTag, tagIds: tagIds };
   }
 
   /**
