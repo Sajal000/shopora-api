@@ -63,7 +63,7 @@ export class UploadImageProvider {
       const savedImages = await Promise.all(
         files.map(async (file) => {
           const imageDoc = new this.imageModel({
-            urls: { original: file.path },
+            urls: { original: file.path, thumbnail: '', medium: '' },
             size: file.size,
             mimeType: file.mimetype,
             authorId,
@@ -73,16 +73,19 @@ export class UploadImageProvider {
         }),
       );
 
-      const imageIds = savedImages.map((image) => image._id);
+      const imageUrls = savedImages.map(
+        (image) =>
+          (image.urls as unknown as { original: string }).original || '',
+      );
 
       await this.productModel.findByIdAndUpdate(
         productId,
         {
-          $push: { featuredImages: { $each: imageIds } },
+          $push: { featuredImages: { $each: imageUrls } },
         },
         { new: true },
       );
-      return { savedImages: savedImages, imageIds: imageIds };
+      return { savedImages: savedImages, imageUrls: imageUrls };
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],
