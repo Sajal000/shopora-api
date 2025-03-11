@@ -1,8 +1,11 @@
 import {
   Controller,
   Delete,
+  Get,
+  NotFoundException,
   Param,
   Post,
+  Res,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ImagesService } from './providers/images.service';
+import { Response } from 'express';
 import { Auth } from 'src/auth/decorator/auth.decorator';
 import { AuthType } from 'src/auth/enum/auth-type.enum';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -49,6 +53,25 @@ export class ImagesController {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     return await this.imageService.uploadImages(files, authorId, productId);
+  }
+
+  @Auth(AuthType.VerifiedBearer)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Fetch an image via ID' })
+  @ApiResponse({ status: 200, description: 'Successfully fetched an image' })
+  @Get('/:imageId')
+  public async getImage(
+    @Param('imageId') imageId: string,
+    @Res() res: Response,
+  ) {
+    const image = await this.imageService.findImageById(imageId);
+
+    if (!image || !image.urls.length || !image.urls[0].original) {
+      throw new NotFoundException('Image not found');
+    }
+
+    res.setHeader('Content-Type', image.mimeType);
+    res.sendFile(image.urls[0].original, { root: './' });
   }
 
   /**

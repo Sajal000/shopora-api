@@ -46,7 +46,6 @@ export class UploadImageProvider {
       }
 
       const mongoProductId = new mongoose.Types.ObjectId(productId);
-
       const post = await this.productModel
         .findOne({ _id: mongoProductId })
         .lean();
@@ -60,10 +59,16 @@ export class UploadImageProvider {
         );
       }
 
+      const baseUrl = 'https://shopora-api.onrender.com';
+
       const savedImages = await Promise.all(
         files.map(async (file) => {
           const imageDoc = new this.imageModel({
-            urls: { original: file.path, thumbnail: '', medium: '' },
+            urls: {
+              original: `${baseUrl}/uploads/${file.filename}`,
+              thumbnail: '',
+              medium: '',
+            },
             size: file.size,
             mimeType: file.mimetype,
             authorId,
@@ -74,8 +79,7 @@ export class UploadImageProvider {
       );
 
       const imageUrls = savedImages.map(
-        (image) =>
-          (image.urls as unknown as { original: string }).original || '',
+        (image: ImageDocument) => image.urls[0]?.original || '',
       );
 
       await this.productModel.findByIdAndUpdate(
@@ -85,7 +89,8 @@ export class UploadImageProvider {
         },
         { new: true },
       );
-      return { savedImages: savedImages, imageUrls: imageUrls };
+
+      return { savedImages, imageUrls };
     } catch (error: unknown) {
       throw new InternalServerErrorException({
         message: (error as Error).message.split(':')[0],

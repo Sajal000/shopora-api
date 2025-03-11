@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UploadImageProvider } from './upload-image.provider';
 import { MulterFile } from '../interfaces/multer-file.interface';
 import { DeleteImageProvider } from './delete-image.provider';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { ImageDocument } from '../schemas/image.schema';
 
 @Injectable()
 export class ImagesService {
@@ -14,6 +17,11 @@ export class ImagesService {
      * Inject deleteImageProvider
      */
     private readonly deleteImageProvider: DeleteImageProvider,
+    /**
+     * Inject mongoDb
+     */
+    @InjectModel(Image.name)
+    private readonly imageModel: Model<ImageDocument>,
   ) {}
 
   /**
@@ -43,5 +51,13 @@ export class ImagesService {
    */
   public async deleteImage(imageId: string, productId: string) {
     return await this.deleteImageProvider.deleteImage(imageId, productId);
+  }
+
+  async findImageById(imageId: string) {
+    const image = await this.imageModel.findById(imageId).lean();
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+    return image;
   }
 }
