@@ -4,7 +4,7 @@ import { MulterFile } from '../interfaces/multer-file.interface';
 import { DeleteImageProvider } from './delete-image.provider';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ImageDocument } from '../schemas/image.schema';
+import { Image, ImageDocument } from '../schemas/image.schema';
 
 @Injectable()
 export class ImagesService {
