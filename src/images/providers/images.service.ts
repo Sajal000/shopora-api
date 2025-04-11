@@ -53,7 +53,7 @@ export class ImagesService {
     return await this.deleteImageProvider.deleteImage(imageId, productId);
   }
 
-  async findImageById(imageId: string) {
+  public async findImageById(imageId: string) {
     const image = await this.imageModel.findById(imageId).lean();
     if (!image) {
       throw new NotFoundException('Image not found');

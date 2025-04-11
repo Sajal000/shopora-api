@@ -78,7 +78,7 @@ export class AuthController {
   })
   @ApiQuery({
     name: 'q',
-    description: 'Expected value: reset-password or void',
+    description: 'Expected value: forgot-password or void',
     required: false,
   })
   @Auth(AuthType.None)
@@ -101,7 +101,7 @@ export class AuthController {
   })
   @ApiQuery({
     name: 'q',
-    description: 'Expected value: reset-password or void',
+    description: 'Expected value: forgot-password or void',
     required: false,
   })
   @Auth(AuthType.None)
